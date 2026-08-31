@@ -175,7 +175,7 @@
 
     // Keep the approved image-generation prompt in prompt_template.txt rather
     // than asking the model to rewrite or shorten it.
-    fetch('prompt_template.txt')
+    fetch('prompt_template.txt', { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load prompt template');
         return response.text();
@@ -215,8 +215,8 @@
       // The image prompt must always be the approved template.  Replace only
       // the two clearly marked variable fields with the submitted values.
       outputPrompt.value = promptTemplate
-        .replaceAll('[DONOR NAME]', donorName)
-        .replaceAll('[AMOUNT]', donationDetail);
+        .replaceAll('[DONOR_NAME]', donorName)
+        .replaceAll('[DONATION_DETAIL]', donationDetail);
       outputCaption.innerText = '';
       resultBox.classList.remove('hidden');
 

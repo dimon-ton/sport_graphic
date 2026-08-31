@@ -10,11 +10,21 @@ The overall composition, visual hierarchy, proportions, typography placement, de
 
 VARIABLE DATA:
 
-- Donor name: [DONOR NAME]
+- Donor name: [DONOR_NAME]
 
-- Donation amount or item detail: [AMOUNT]
+- Donation amount or item detail: [DONATION_DETAIL]
 
 - Donor portrait: use the uploaded donor image
+
+DATA CONSISTENCY RULE:
+
+VARIABLE DATA and FIXED SCHOOL INFORMATION are the single sources of truth.
+
+If any value elsewhere in this prompt conflicts with these sections, always
+use the values from VARIABLE DATA and FIXED SCHOOL INFORMATION.
+
+Do not invent, modify, or substitute donor names, donation amounts or item
+details, bank account numbers, school names, or event information.
 
 FIXED SCHOOL INFORMATION:
 
@@ -40,7 +50,7 @@ Second line:
 
 Main donor name:
 
-“[DONOR NAME]”
+“[DONOR_NAME]”
 
 Supporting text:
 
@@ -48,7 +58,7 @@ Supporting text:
 
 Donation card:
 
-“จำนวน [AMOUNT]”
+“จำนวน [DONATION_DETAIL]”
 
 Bank information:
 
@@ -122,7 +132,7 @@ on the left.
 
 Place the submitted donation detail exactly as written:
 
-“[AMOUNT]”
+“[DONATION_DETAIL]”
 
 very large, bold and black in the center. If the detail is money, preserve its
 currency unit exactly once. If it is an in-kind donation such as water packs,
