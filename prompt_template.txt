@@ -12,19 +12,33 @@ VARIABLE DATA:
 
 - Donor name: [DONOR_NAME]
 
-- Donation amount or item detail: [DONATION_DETAIL]
+- Donation type: [DONATION_TYPE]
+
+- Donation detail: [DONATION_DETAIL]
 
 - Donor portrait: use the uploaded donor image
 
-DATA CONSISTENCY RULE:
+STRICT DATA RULE:
 
-VARIABLE DATA and FIXED SCHOOL INFORMATION are the single sources of truth.
+VARIABLE DATA and FIXED SCHOOL INFORMATION are the only sources of factual text.
 
-If any value elsewhere in this prompt conflicts with these sections, always
-use the values from VARIABLE DATA and FIXED SCHOOL INFORMATION.
+Never invent, infer, complete, translate, normalize, modify, or substitute
+these values. If anything conflicts with them, always use these source values.
 
-Do not invent, modify, or substitute donor names, donation amounts or item
-details, bank account numbers, school names, or event information.
+STRICT DONATION TEXT RULE:
+
+Treat Donation detail as literal display text, not text to interpret or complete.
+
+- Display Donation detail exactly as provided.
+- If Donation type is "money", do not add a second currency unit.
+- If Donation type is "in-kind", never add “บาท” or any currency wording.
+- Never append a unit that is not already present in Donation detail.
+
+Examples:
+- “น้ำดื่ม 10 แพ็ค” must remain exactly “น้ำดื่ม 10 แพ็ค”.
+- “มาม่า 10 ห่อ” must remain exactly “มาม่า 10 ห่อ”.
+- “5,000 บาท” must remain exactly “5,000 บาท”.
+- Never produce “น้ำดื่ม 10 แพ็ค บาท”, “มาม่า 10 ห่อ บาท”, or “5,000 บาท บาท”.
 
 FIXED SCHOOL INFORMATION:
 
@@ -32,7 +46,7 @@ FIXED SCHOOL INFORMATION:
 
 - Event: สนับสนุนกีฬาสีภายใน “โพนแท่นเกมส์ ครั้งที่ 31” ประจำปี 2569
 
-- Bank account number: 020172956318
+- Bank information: เลขบัญชี ธนาคารออมสิน 020172956318
 
 - Account name: โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)
 
@@ -42,7 +56,7 @@ TEXT CONTENT:
 
 Top heading:
 
-“โรงเรียนบ้านโพนแท่น”
+Use School name from FIXED SCHOOL INFORMATION exactly.
 
 Second line:
 
@@ -50,25 +64,24 @@ Second line:
 
 Main donor name:
 
-“[DONOR_NAME]”
+Use Donor name from VARIABLE DATA exactly.
 
 Supporting text:
 
-“สนับสนุนกีฬาสีภายใน ‘โพนแท่นเกมส์ ครั้งที่ 31’ ประจำปี 2569”
+Use Event from FIXED SCHOOL INFORMATION exactly.
 
 Donation card:
 
-“จำนวน [DONATION_DETAIL]”
+Use Donation type and Donation detail from VARIABLE DATA according to the
+STRICT DONATION TEXT RULE.
 
 Bank information:
 
-“เลขบัญชี ธนาคารออมสิน 020172956318”
-
-“โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)”
+Use Bank information and Account name from FIXED SCHOOL INFORMATION exactly.
 
 Footer:
 
-“การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า”
+Use Footer message from FIXED SCHOOL INFORMATION exactly.
 
 DESIGN DIRECTION:
 
@@ -116,42 +129,26 @@ Behind the donor, place a symmetrical elegant golden laurel wreath, framing the 
 
 Add soft purple glow and bokeh behind the person to create separation from the background.
 
-DONATION AMOUNT CARD:
+DONATION DETAIL CARD:
 
 Create a large premium white ticket-shaped information card across the lower-middle section.
 
 Use softly rounded corners, elegant curved ticket-style side cutouts, thin metallic-gold border, and a subtle warm glow.
 
-Inside the card:
+Inside the card, use “จำนวน” as the left label for money and “บริจาค” as the
+left label for an in-kind donation.
 
-Place the word:
+Place Donation detail from VARIABLE DATA exactly as provided, very large, bold,
+and black in the center. Do not rewrite, reinterpret, translate, or append
+anything to it.
 
-“จำนวน”
-
-on the left.
-
-Place the submitted donation detail exactly as written:
-
-“[DONATION_DETAIL]”
-
-very large, bold and black in the center. If the detail is money, preserve its
-currency unit exactly once. If it is an in-kind donation such as water packs,
-do not add a currency unit or the word “บาท”.
-
-The amount should be the strongest visual element inside the card.
+The donation detail should be the strongest visual element inside the card.
 
 Add a subtle horizontal dashed divider line underneath.
 
-Below the divider place:
-
-“เลขบัญชี ธนาคารออมสิน 020172956318”
-
-Show this full account number exactly as written. Never mask, shorten, replace,
-or redact any digits.
-
-and underneath:
-
-“โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)”
+Below the divider, place Bank information from FIXED SCHOOL INFORMATION and
+Account name underneath it. Show the full account number exactly as written.
+Never mask, shorten, replace, or redact any digits.
 
 Make the school/account-name line slightly bolder.
 
@@ -159,7 +156,7 @@ BOTTOM SECTION:
 
 Place the footer statement prominently below the white card:
 
-“การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า”
+Use Footer message from FIXED SCHOOL INFORMATION exactly.
 
 Use bold white Thai typography.
 
@@ -189,7 +186,7 @@ Maintain strong visual hierarchy:
 
 5. Donor portrait with golden laurel
 
-6. Donation amount card
+6. Donation detail card
 
 7. Bank information
 

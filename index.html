@@ -28,7 +28,14 @@
         <input type="text" id="donorName" placeholder="เช่น ร้าน ก.การค้า หรือ คุณสมชาย" class="mt-1 w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-sm font-medium text-blue-900">ยอดเงิน หรือ สิ่งของที่บริจาค</label>
+        <label class="block text-sm font-medium text-blue-900">ประเภทการบริจาค</label>
+        <select id="donationType" class="mt-1 w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+          <option value="money">เงิน</option>
+          <option value="in-kind">สิ่งของ</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-blue-900">รายละเอียดการบริจาค</label>
         <input type="text" id="donationDetail" placeholder="เช่น 2,000 บาท หรือ น้ำดื่ม 10 แพ็ก" class="mt-1 w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
       </div>
     </div>
@@ -71,6 +78,7 @@
   <script>
     const donorNameInput = document.getElementById('donorName');
     const donationDetailInput = document.getElementById('donationDetail');
+    const donationTypeInput = document.getElementById('donationType');
     const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
     const previewContainer = document.getElementById('previewContainer');
@@ -206,16 +214,18 @@
 
       const donorName = donorNameInput.value.trim() || '[ชื่อผู้บริจาค/หน่วยงาน]';
       const donationDetail = donationDetailInput.value.trim() || '[รายการสนับสนุน]';
+      const donationType = donationTypeInput.value;
 
       if (!promptTemplate) {
         alert('ไม่สามารถโหลด prompt_template.txt ได้ กรุณารีเฟรชหน้าเว็บแล้วลองใหม่อีกครั้ง');
         return;
       }
 
-      // The image prompt must always be the approved template.  Replace only
-      // the two clearly marked variable fields with the submitted values.
+      // The image prompt must always be the approved template. Replace only
+      // the single-source variable fields with the submitted values.
       outputPrompt.value = promptTemplate
         .replaceAll('[DONOR_NAME]', donorName)
+        .replaceAll('[DONATION_TYPE]', donationType)
         .replaceAll('[DONATION_DETAIL]', donationDetail);
       outputCaption.innerText = '';
       resultBox.classList.remove('hidden');
