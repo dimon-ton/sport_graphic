@@ -24,7 +24,28 @@ function doPost(event) {
     const apiKey = getSetting_('OPENROUTER_API_KEY');
     if (!apiKey) throw new Error('OPENROUTER_API_KEY is missing from the Settings tab.');
 
-    const instruction = `Write a polite, engaging, and professional Facebook caption in Thai to thank the donor for supporting the school sports day. Donor: "${donorName}". Donation: "${donationDetail}". Include relevant hashtags. Return a raw JSON object with exactly one key: "facebook_caption". Do not include Markdown formatting in the JSON output.`;
+    const instruction = `Create a Thai Facebook appreciation caption in the following warm, formal school-post style. Return a raw JSON object with exactly one key: "facebook_caption". Do not include Markdown formatting outside the JSON.
+
+Use these exact values:
+- Donor name: "${donorName}"
+- Donation amount/detail: "${donationDetail}"
+- School: โรงเรียนบ้านโพนแท่น
+- Event: สนับสนุนกีฬาสีภายใน “โพนแท่นเกมส์ ครั้งที่ 31” ประจำปีการศึกษา 2569
+- Bank: เลขบัญชี ธนาคารออมสิน 020172956318
+- Account: โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)
+- Tax message: การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า
+
+Follow this structure closely, using tasteful emojis and line breaks:
+1. Announce the school and a thank-you heading.
+2. Thank the donor by name.
+3. State the event and donation amount/detail.
+4. Include the exact bank and account information.
+5. Include the exact tax-deduction message.
+6. Add a short paragraph saying every contribution encourages students to compete fully and make good memories.
+7. Close with a sincere blessing for the donor and family: happiness, prosperity, good health, and lasting wellbeing.
+8. End with relevant Thai hashtags, including #กีฬาสีภายใน #โพนแท่นเกมส์ #การบริจาคเพื่อสถานศึกษาสามารถลดหย่อนภาษีได้2เท่า #ผู้ให้การสนับสนุน #ผู้ใหญ่ใจดี.
+
+Use correct Thai spelling. Do not invent facts, omit any fixed information, or add unrelated hashtags.`;
     const openRouterResponse = UrlFetchApp.fetch(OPENROUTER_URL, {
       method: 'post',
       contentType: 'application/json',
