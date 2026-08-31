@@ -83,6 +83,7 @@
 
     let base64Image = null;
     let imageMimeType = 'image/jpeg';
+    let imageName = 'donation-image.jpg';
     let promptTemplate = '';
 
     // Apps Script web apps do not send CORS headers. JSONP loads the response
@@ -107,10 +108,63 @@
           callback: callbackName,
           donorName: payload.donorName,
           donationDetail: payload.donationDetail,
-          hasPortrait: String(payload.hasPortrait)
+          hasPortrait: String(payload.hasPortrait),
+          imageUrl: payload.imageUrl || ''
         });
         script.src = `${appsScriptUrl}${appsScriptUrl.includes('?') ? '&' : '?'}${params}`;
         document.head.appendChild(script);
+      });
+    }
+
+    function uploadImage(appsScriptUrl) {
+      return new Promise((resolve, reject) => {
+        const nonce = `upload_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const iframe = document.createElement('iframe');
+        const form = document.createElement('form');
+        const timeout = window.setTimeout(() => finish(new Error('อัปโหลดรูปไปยัง Google Drive ใช้เวลานานเกินไป')), 60000);
+
+        function finish(error, data) {
+          window.clearTimeout(timeout);
+          window.removeEventListener('message', onMessage);
+          form.remove();
+          iframe.remove();
+          if (error) reject(error);
+          else resolve(data);
+        }
+
+        function onMessage(event) {
+          const message = event.data;
+          if (!message || message.type !== 'donation-image-upload' || message.nonce !== nonce) return;
+          if (!message.result || !message.result.success) {
+            finish(new Error(message.result && message.result.error || 'ไม่สามารถบันทึกรูปใน Google Drive ได้'));
+            return;
+          }
+          finish(null, message.result);
+        }
+
+        function addField(name, value) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        }
+
+        iframe.name = nonce;
+        iframe.hidden = true;
+        form.method = 'post';
+        form.action = appsScriptUrl;
+        form.target = nonce;
+        form.hidden = true;
+        addField('action', 'uploadImage');
+        addField('nonce', nonce);
+        addField('origin', window.location.origin);
+        addField('imageBase64', base64Image);
+        addField('imageMimeType', imageMimeType);
+        addField('imageName', imageName);
+        window.addEventListener('message', onMessage);
+        document.body.append(iframe, form);
+        form.submit();
       });
     }
 
@@ -134,6 +188,7 @@
       const file = e.target.files[0];
       if (file) {
         imageMimeType = file.type;
+        imageName = file.name || 'donation-image.jpg';
         const reader = new FileReader();
         reader.onload = function(event) {
           imagePreview.src = event.target.result;
@@ -166,13 +221,20 @@
       resultBox.classList.remove('hidden');
 
       submitBtn.disabled = true;
-      submitBtnText.innerText = 'กำลังบันทึกข้อมูลและร่างแคปชัน...';
+      submitBtnText.innerText = base64Image ? 'กำลังบันทึกรูปใน Google Drive...' : 'กำลังบันทึกข้อมูลและร่างแคปชัน...';
 
       try {
+        let imageUrl = '';
+        if (base64Image) {
+          const upload = await uploadImage(appsScriptUrl);
+          imageUrl = upload.imageUrl;
+          submitBtnText.innerText = 'กำลังบันทึกข้อมูลและร่างแคปชัน...';
+        }
         const data = await requestCaption(appsScriptUrl, {
           donorName,
           donationDetail,
-          hasPortrait: Boolean(base64Image)
+          hasPortrait: Boolean(base64Image),
+          imageUrl
         });
         if (!data.success) throw new Error(data.error || 'Google Apps Script request failed');
         outputCaption.innerText = data.facebook_caption;

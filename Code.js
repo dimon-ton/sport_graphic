@@ -8,6 +8,7 @@
 
 const SETTINGS_TAB = 'Settings';
 const DONATIONS_TAB = 'Donations';
+const DONATION_IMAGES_FOLDER = 'Donation Images';
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 function doGet(event) {
@@ -22,7 +23,11 @@ function doGet(event) {
 
 function doPost(event) {
   try {
-    return json_(processRequest_(JSON.parse(event.postData && event.postData.contents || '{}')));
+    const payload = event.parameter && event.parameter.action === 'uploadImage'
+      ? event.parameter
+      : JSON.parse(event.postData && event.postData.contents || '{}');
+    if (payload.action === 'uploadImage') return uploadImageResponse_(payload);
+    return json_(processRequest_(payload));
   } catch (error) {
     console.error(error);
     return json_({ success: false, error: error.message || String(error) });
@@ -86,9 +91,42 @@ Use correct Thai spelling. Do not invent facts, omit any fixed information, or a
 
     const generated = JSON.parse(openRouterData.choices[0].message.content.replace(/```json|```/g, '').trim());
     const caption = generated.facebook_caption;
-    appendDonation_([new Date(), donorName, donationDetail, imagePrompt, caption, payload.hasPortrait ? 'Yes' : 'No']);
+    appendDonation_([
+      new Date(), donorName, donationDetail, imagePrompt, caption,
+      payload.hasPortrait ? 'Yes' : 'No', String(payload.imageUrl || '')
+    ]);
 
     return { success: true, facebook_caption: caption };
+}
+
+function uploadImageResponse_(payload) {
+  const nonce = String(payload.nonce || '');
+  const origin = String(payload.origin || '');
+  let result;
+  try {
+    if (!nonce || !origin) throw new Error('Missing upload nonce or origin.');
+    const imageData = String(payload.imageBase64 || '');
+    if (!imageData) throw new Error('Missing image data.');
+
+    const fileName = sanitizeFileName_(payload.imageName || 'donation-image.jpg');
+    const blob = Utilities.newBlob(
+      Utilities.base64Decode(imageData),
+      String(payload.imageMimeType || 'image/jpeg'),
+      fileName
+    );
+    const file = getDonationImagesFolder_().createFile(blob);
+    result = { success: true, imageUrl: file.getUrl(), imageId: file.getId() };
+  } catch (error) {
+    console.error(error);
+    result = { success: false, error: error.message || String(error) };
+  }
+
+  const message = JSON.stringify({ type: 'donation-image-upload', nonce, result })
+    .replace(/</g, '\\u003c');
+  const targetOrigin = JSON.stringify(origin).replace(/</g, '\\u003c');
+  return HtmlService.createHtmlOutput(
+    `<script>window.parent.postMessage(${message}, ${targetOrigin});</script>`
+  ).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function getSetting_(key) {
@@ -104,10 +142,21 @@ function appendDonation_(row) {
   let sheet = spreadsheet.getSheetByName(DONATIONS_TAB);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(DONATIONS_TAB);
-    sheet.appendRow(['Timestamp', 'Donor name', 'Donation', 'Image prompt', 'Facebook caption', 'Portrait supplied']);
+    sheet.appendRow(['Timestamp', 'Donor name', 'Donation', 'Image prompt', 'Facebook caption', 'Portrait supplied', 'Image URL']);
     sheet.setFrozenRows(1);
+  } else if (!sheet.getRange(1, 7).getDisplayValue()) {
+    sheet.getRange(1, 7).setValue('Image URL');
   }
   sheet.appendRow(row);
+}
+
+function getDonationImagesFolder_() {
+  const folders = DriveApp.getFoldersByName(DONATION_IMAGES_FOLDER);
+  return folders.hasNext() ? folders.next() : DriveApp.createFolder(DONATION_IMAGES_FOLDER);
+}
+
+function sanitizeFileName_(name) {
+  return String(name).replace(/[\\/:*?"<>|]/g, '_').slice(0, 180) || 'donation-image.jpg';
 }
 
 function json_(data) {
