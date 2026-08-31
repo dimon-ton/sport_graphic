@@ -30,6 +30,10 @@ function doPost(event) {
 }
 
 function processRequest_(payload) {
+    if (payload.action === 'health') {
+      return { success: true, service: 'donor-caption' };
+    }
+
     const donorName = String(payload.donorName || '').trim();
     const donationDetail = String(payload.donationDetail || '').trim();
     const imagePrompt = String(payload.prompt || 'Generated locally from prompt_template.txt').trim();
