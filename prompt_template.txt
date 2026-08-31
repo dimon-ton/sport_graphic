@@ -34,11 +34,10 @@ Treat Donation detail as literal display text, not text to interpret or complete
 - If Donation type is "in-kind", never add “บาท” or any currency wording.
 - Never append a unit that is not already present in Donation detail.
 
-Examples:
-- “น้ำดื่ม 10 แพ็ค” must remain exactly “น้ำดื่ม 10 แพ็ค”.
-- “มาม่า 10 ห่อ” must remain exactly “มาม่า 10 ห่อ”.
-- “5,000 บาท” must remain exactly “5,000 บาท”.
-- Never produce “น้ำดื่ม 10 แพ็ค บาท”, “มาม่า 10 ห่อ บาท”, or “5,000 บาท บาท”.
+Forbidden output patterns:
+- Any in-kind Donation detail followed by currency wording.
+- Donation detail followed by any unit not present in its source value.
+- A currency word or symbol repeated after Donation detail.
 
 FIXED SCHOOL INFORMATION:
 
