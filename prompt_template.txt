@@ -10,9 +10,9 @@ The overall composition, visual hierarchy, proportions, typography placement, de
 
 VARIABLE DATA:
 
-- Donor name: นายสมชาย ใจดี
+- Donor name: [DONOR NAME]
 
-- Donation amount: 2,000 บาท
+- Donation amount or item detail: [AMOUNT]
 
 - Donor portrait: use the uploaded donor image
 
@@ -48,7 +48,7 @@ Supporting text:
 
 Donation card:
 
-“จำนวน [AMOUNT] บาท”
+“จำนวน [AMOUNT]”
 
 Bank information:
 
@@ -120,17 +120,13 @@ Place the word:
 
 on the left.
 
-Place:
+Place the submitted donation detail exactly as written:
 
 “[AMOUNT]”
 
-very large, bold and black in the center.
-
-Place:
-
-“บาท”
-
-large on the right.
+very large, bold and black in the center. If the detail is money, preserve its
+currency unit exactly once. If it is an in-kind donation such as water packs,
+do not add a currency unit or the word “บาท”.
 
 The amount should be the strongest visual element inside the card.
 
@@ -139,6 +135,9 @@ Add a subtle horizontal dashed divider line underneath.
 Below the divider place:
 
 “เลขบัญชี ธนาคารออมสิน 020172956318”
+
+Show this full account number exactly as written. Never mask, shorten, replace,
+or redact any digits.
 
 and underneath:
 
