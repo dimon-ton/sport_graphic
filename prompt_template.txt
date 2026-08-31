@@ -1,0 +1,219 @@
+Create a premium vertical Thai school appreciation poster based closely on the provided reference image.
+
+IMPORTANT:
+
+Use the provided reference poster only as the DESIGN AND LAYOUT REFERENCE.
+
+Use the newly uploaded portrait photo as the PERSON / IDENTITY REFERENCE.
+
+The overall composition, visual hierarchy, proportions, typography placement, decorative elements, and premium celebratory atmosphere should closely follow the reference poster.
+
+VARIABLE DATA:
+
+- Donor name: นายสมชาย ใจดี
+
+- Donation amount: 2,000 บาท
+
+- Donor portrait: use the uploaded donor image
+
+FIXED SCHOOL INFORMATION:
+
+- School name: โรงเรียนบ้านโพนแท่น
+
+- Event: สนับสนุนกีฬาสีภายใน “โพนแท่นเกมส์ ครั้งที่ 31” ประจำปี 2569
+
+- Bank account number: 020172956318
+
+- Account name: โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)
+
+- Footer message: การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า
+
+TEXT CONTENT:
+
+Top heading:
+
+“โรงเรียนบ้านโพนแท่น”
+
+Second line:
+
+“ขอขอบพระคุณ”
+
+Main donor name:
+
+“[DONOR NAME]”
+
+Supporting text:
+
+“สนับสนุนกีฬาสีภายใน ‘โพนแท่นเกมส์ ครั้งที่ 31’ ประจำปี 2569”
+
+Donation card:
+
+“จำนวน [AMOUNT] บาท”
+
+Bank information:
+
+“เลขบัญชี ธนาคารออมสิน 020172956318”
+
+“โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)”
+
+Footer:
+
+“การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า”
+
+DESIGN DIRECTION:
+
+Create a luxurious, modern and celebratory school appreciation graphic.
+
+Use a deep royal-purple gradient background with subtle magenta and violet highlights.
+
+Add elegant golden confetti floating around the composition, soft glowing bokeh lights, tiny luminous particles, and subtle cinematic light effects.
+
+Use a premium purple-and-gold color palette:
+
+- deep royal purple
+
+- violet
+
+- magenta accents
+
+- metallic champagne gold
+
+- white
+
+At the top, place the school name prominently in bold white Thai typography with subtle dimensional shadowing.
+
+Place “ขอขอบพระคุณ” underneath in large white Thai typography.
+
+Make the donor’s name the main typographic highlight using elegant metallic-gold Thai lettering with subtle depth, glow, and premium embossed appearance.
+
+Place the event description below the donor name in clean white typography.
+
+PORTRAIT AREA:
+
+Place the donor portrait prominently in the center.
+
+Preserve the donor’s real facial identity accurately.
+
+Do not alter facial structure, age, body proportions, hairstyle, or recognizable features.
+
+Professionally remove the original photo background and integrate the person naturally into the poster.
+
+Use flattering professional lighting, subtle edge lighting, natural skin texture, and realistic photographic detail.
+
+Do not make the person look illustrated, cartoonish, plastic, or AI-generated.
+
+Behind the donor, place a symmetrical elegant golden laurel wreath, framing the person without covering the face or body.
+
+Add soft purple glow and bokeh behind the person to create separation from the background.
+
+DONATION AMOUNT CARD:
+
+Create a large premium white ticket-shaped information card across the lower-middle section.
+
+Use softly rounded corners, elegant curved ticket-style side cutouts, thin metallic-gold border, and a subtle warm glow.
+
+Inside the card:
+
+Place the word:
+
+“จำนวน”
+
+on the left.
+
+Place:
+
+“[AMOUNT]”
+
+very large, bold and black in the center.
+
+Place:
+
+“บาท”
+
+large on the right.
+
+The amount should be the strongest visual element inside the card.
+
+Add a subtle horizontal dashed divider line underneath.
+
+Below the divider place:
+
+“เลขบัญชี ธนาคารออมสิน 020172956318”
+
+and underneath:
+
+“โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)”
+
+Make the school/account-name line slightly bolder.
+
+BOTTOM SECTION:
+
+Place the footer statement prominently below the white card:
+
+“การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า”
+
+Use bold white Thai typography.
+
+Finish the bottom edge with elegant layered geometric ribbons in:
+
+- deep purple
+
+- metallic gold
+
+- vivid magenta
+
+Maintain the polished visual language of the reference.
+
+COMPOSITION:
+
+Vertical poster, approximately 4:5 aspect ratio.
+
+Maintain strong visual hierarchy:
+
+1. School name
+
+2. Thank-you message
+
+3. Donor name
+
+4. Event description
+
+5. Donor portrait with golden laurel
+
+6. Donation amount card
+
+7. Bank information
+
+8. Tax-deduction message
+
+The design should feel professional enough for an official school Facebook post while still looking festive, prestigious, warm, and appreciative.
+
+HIGH QUALITY REQUIREMENTS:
+
+- premium graphic-design quality
+
+- sharp Thai typography
+
+- accurate Thai spelling
+
+- clean spacing
+
+- centered alignment
+
+- realistic portrait integration
+
+- elegant metallic gold effects
+
+- balanced visual hierarchy
+
+- no random text
+
+- no duplicate text
+
+- no distorted letters
+
+- no incorrect bank numbers
+
+- no extra logos unless provided
+
+- no watermark
