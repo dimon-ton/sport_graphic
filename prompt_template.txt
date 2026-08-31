@@ -20,23 +20,47 @@ VARIABLE DATA:
 
 STRICT DATA RULE:
 
-VARIABLE DATA and FIXED SCHOOL INFORMATION are the only sources of factual text.
+VARIABLE DATA and FIXED SCHOOL INFORMATION are the only sources of variable
+factual content.
 
-Never invent, infer, complete, translate, normalize, modify, or substitute
-these values. If anything conflicts with them, always use these source values.
+The fixed display labels explicitly specified in this prompt, including
+“ขอขอบพระคุณ”, “จำนวน”, and “บริจาค”, are authorized static labels.
 
-STRICT DONATION TEXT RULE:
+Never invent, infer, complete, translate, normalize, modify, substitute, or
+supplement any value from VARIABLE DATA or FIXED SCHOOL INFORMATION. If
+anything conflicts with them, always use these source values.
 
-Treat Donation detail as literal display text, not text to interpret or complete.
+DONATION TYPE HANDLING:
 
-- Display Donation detail exactly as provided.
-- If Donation type is "money", do not add a second currency unit.
-- If Donation type is "in-kind", never add “บาท” or any currency wording.
-- Never append a unit that is not already present in Donation detail.
+Donation type is CONTROL METADATA ONLY. Never display its literal value
+anywhere in the poster.
+
+Use Donation type only to determine the donation-card label and whether
+currency wording is permitted.
+
+- If Donation type is "money", use “จำนวน” as the left-side label. Do not add
+  currency wording; any currency displayed must already be part of Donation detail.
+- If Donation type is "in-kind", use “บริจาค” as the left-side label. Never
+  display “in-kind” and never add a currency word or symbol.
+
+STRICT DONATION DETAIL RULE:
+
+Donation detail is one immutable atomic display string. Display it exactly,
+character-for-character, as provided in VARIABLE DATA.
+
+Do not parse Donation detail into product, quantity, unit, amount, price, or
+currency components. Do not translate, normalize, rewrite, abbreviate,
+pluralize, complete, or append anything to it.
+
+Do not prepend or append text, a unit, currency wording, a currency symbol, or
+punctuation inside the Donation detail string unless it already exists in the
+source value. The separate left-side Thai label selected by Donation type is
+the only authorized adjacent display element.
 
 Forbidden output patterns:
+- The literal Donation type displayed anywhere.
 - Any in-kind Donation detail followed by currency wording.
-- Donation detail followed by any unit not present in its source value.
+- Donation detail followed by a unit not present in its source value.
 - A currency word or symbol repeated after Donation detail.
 
 FIXED SCHOOL INFORMATION:
@@ -71,8 +95,9 @@ Use Event from FIXED SCHOOL INFORMATION exactly.
 
 Donation card:
 
-Use Donation type and Donation detail from VARIABLE DATA according to the
-STRICT DONATION TEXT RULE.
+Use Donation type only as hidden control metadata. Display only the appropriate
+Thai label and Donation detail according to DONATION TYPE HANDLING and the
+STRICT DONATION DETAIL RULE.
 
 Bank information:
 
@@ -134,12 +159,11 @@ Create a large premium white ticket-shaped information card across the lower-mid
 
 Use softly rounded corners, elegant curved ticket-style side cutouts, thin metallic-gold border, and a subtle warm glow.
 
-Inside the card, use “จำนวน” as the left label for money and “บริจาค” as the
-left label for an in-kind donation.
+Inside the card, follow DONATION TYPE HANDLING and the STRICT DONATION DETAIL
+RULE. Render only the selected Thai label and the immutable Donation detail.
+Never render Donation type itself.
 
-Place Donation detail from VARIABLE DATA exactly as provided, very large, bold,
-and black in the center. Do not rewrite, reinterpret, translate, or append
-anything to it.
+Place the donation detail very large, bold, and black in the center.
 
 The donation detail should be the strongest visual element inside the card.
 
