@@ -34,6 +34,12 @@ function doPost(event) {
   }
 }
 
+// Run this once from the Apps Script editor to approve Drive access and
+// create the folder used for uploaded donor images.
+function authorizeDrive() {
+  return getDonationImagesFolder_().getUrl();
+}
+
 function processRequest_(payload) {
     if (payload.action === 'health') {
       return { success: true, service: 'donor-caption' };
@@ -125,7 +131,7 @@ function uploadImageResponse_(payload) {
     .replace(/</g, '\\u003c');
   const targetOrigin = JSON.stringify(origin).replace(/</g, '\\u003c');
   return HtmlService.createHtmlOutput(
-    `<script>window.parent.postMessage(${message}, ${targetOrigin});</script>`
+    `<script>window.top.postMessage(${message}, ${targetOrigin});</script>`
   ).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
