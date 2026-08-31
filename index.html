@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบสร้างสื่อและข้อความขอบคุณผู้บริจาค (OpenRouter & Facebook)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-slate-100 min-h-screen p-3 md:p-6 flex justify-center items-center">
   <div class="bg-white w-full max-w-2xl rounded-3xl shadow-xl p-6 space-y-6">
@@ -85,6 +85,35 @@
     let imageMimeType = 'image/jpeg';
     let promptTemplate = '';
 
+    // Apps Script web apps do not send CORS headers. JSONP loads the response
+    // as a script tag instead, so it works from the GitHub Pages origin.
+    function requestCaption(appsScriptUrl, payload) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `appsScriptCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const script = document.createElement('script');
+        const timeout = window.setTimeout(() => finish(new Error('Google Apps Script ใช้เวลาตอบกลับนานเกินไป')), 30000);
+
+        function finish(error, data) {
+          window.clearTimeout(timeout);
+          delete window[callbackName];
+          script.remove();
+          if (error) reject(error);
+          else resolve(data);
+        }
+
+        window[callbackName] = (data) => finish(null, data);
+        script.onerror = () => finish(new Error('ไม่สามารถเชื่อมต่อ Google Apps Script ได้'));
+        const params = new URLSearchParams({
+          callback: callbackName,
+          donorName: payload.donorName,
+          donationDetail: payload.donationDetail,
+          hasPortrait: String(payload.hasPortrait)
+        });
+        script.src = `${appsScriptUrl}${appsScriptUrl.includes('?') ? '&' : '?'}${params}`;
+        document.head.appendChild(script);
+      });
+    }
+
     appsScriptUrlInput.value = localStorage.getItem('appsScriptUrl') || '';
     appsScriptUrlInput.addEventListener('change', () => {
       localStorage.setItem('appsScriptUrl', appsScriptUrlInput.value.trim());
@@ -140,21 +169,12 @@
       submitBtnText.innerText = 'กำลังบันทึกข้อมูลและร่างแคปชัน...';
 
       try {
-        const response = await fetch(appsScriptUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
-          body: JSON.stringify({
-            donorName,
-            donationDetail,
-            prompt: outputPrompt.value,
-            hasPortrait: Boolean(base64Image)
-          })
+        const data = await requestCaption(appsScriptUrl, {
+          donorName,
+          donationDetail,
+          hasPortrait: Boolean(base64Image)
         });
-
-        const data = await response.json();
-        if (!response.ok || !data.success) throw new Error(data.error || 'Google Apps Script request failed');
+        if (!data.success) throw new Error(data.error || 'Google Apps Script request failed');
         outputCaption.innerText = data.facebook_caption;
         resultBox.classList.remove('hidden');
 

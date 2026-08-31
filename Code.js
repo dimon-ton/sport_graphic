@@ -10,12 +10,29 @@ const SETTINGS_TAB = 'Settings';
 const DONATIONS_TAB = 'Donations';
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+function doGet(event) {
+  const callback = String(event.parameter && event.parameter.callback || '');
+  try {
+    return jsonp_(callback, processRequest_(event.parameter || {}));
+  } catch (error) {
+    console.error(error);
+    return jsonp_(callback, { success: false, error: error.message || String(error) });
+  }
+}
+
 function doPost(event) {
   try {
-    const payload = JSON.parse(event.postData && event.postData.contents || '{}');
+    return json_(processRequest_(JSON.parse(event.postData && event.postData.contents || '{}')));
+  } catch (error) {
+    console.error(error);
+    return json_({ success: false, error: error.message || String(error) });
+  }
+}
+
+function processRequest_(payload) {
     const donorName = String(payload.donorName || '').trim();
     const donationDetail = String(payload.donationDetail || '').trim();
-    const imagePrompt = String(payload.prompt || '').trim();
+    const imagePrompt = String(payload.prompt || 'Generated locally from prompt_template.txt').trim();
 
     if (!donorName || !donationDetail || !imagePrompt) {
       throw new Error('Missing donor name, donation detail, or prompt.');
@@ -67,11 +84,7 @@ Use correct Thai spelling. Do not invent facts, omit any fixed information, or a
     const caption = generated.facebook_caption;
     appendDonation_([new Date(), donorName, donationDetail, imagePrompt, caption, payload.hasPortrait ? 'Yes' : 'No']);
 
-    return json_({ success: true, facebook_caption: caption });
-  } catch (error) {
-    console.error(error);
-    return json_({ success: false, error: error.message || String(error) });
-  }
+    return { success: true, facebook_caption: caption };
 }
 
 function getSetting_(key) {
@@ -97,4 +110,13 @@ function json_(data) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function jsonp_(callback, data) {
+  if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
+    return json_({ success: false, error: 'Invalid callback.' });
+  }
+  return ContentService
+    .createTextOutput(`${callback}(${JSON.stringify(data)});`)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
