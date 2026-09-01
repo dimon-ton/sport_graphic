@@ -136,6 +136,9 @@ function uploadImage_(payload) {
       } else {
         donation.donorImageId = file.getId();
         donation.donorImageUrl = imageUrl;
+        if (Object.prototype.hasOwnProperty.call(payload, 'generatedPrompt')) {
+          donation.generatedPrompt = requiredLiteral_(payload.generatedPrompt, 'generatedPrompt');
+        }
       }
       return donation;
     });

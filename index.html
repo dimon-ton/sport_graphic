@@ -116,7 +116,14 @@
         <div><p id="detailDonationType"></p><strong id="detailDonationDetail"></strong><small id="detailCreatedAt"></small><span id="detailStatus" class="status-badge"></span></div>
       </div>
       <div class="media-grid">
-        <article><div class="card-title"><h3>ภาพต้นฉบับ</h3><div><button id="copyDonorImageBtn" class="text-button">คัดลอก</button><a id="openDonorImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div><img id="detailOriginalImage" class="poster-preview hidden" alt="ภาพต้นฉบับ"><p id="noOriginalImage" class="muted">ไม่มีภาพต้นฉบับ</p></article>
+        <article>
+          <div class="card-title"><h3>ภาพผู้บริจาค</h3><div><button id="copyDonorImageBtn" class="text-button">คัดลอก</button><a id="openDonorImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div>
+          <img id="detailOriginalImage" class="poster-preview hidden" alt="ภาพผู้บริจาค">
+          <p id="noOriginalImage" class="muted">ยังไม่มีภาพผู้บริจาค สามารถเพิ่มภายหลังได้</p>
+          <label class="drop-zone" id="detailDonorDropZone">อัปโหลดหรือลากไฟล์ภาพผู้บริจาคมาวาง<input id="detailDonorImageInput" type="file" accept="image/jpeg,image/png"></label>
+          <img id="detailDonorUploadPreview" class="poster-preview hidden" alt="ตัวอย่างภาพผู้บริจาค">
+          <button id="saveDetailDonorImageBtn" class="secondary-button hidden">บันทึกภาพผู้บริจาค</button>
+        </article>
         <article><div class="card-title"><h3>โปสเตอร์ที่สร้างแล้ว</h3><div><button id="copyGeneratedImageBtn" class="text-button">คัดลอก</button><a id="openGeneratedImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div><img id="detailGeneratedImage" class="poster-preview hidden" alt="โปสเตอร์ที่สร้างแล้ว"><p id="noGeneratedImage" class="muted">ยังไม่ได้อัปโหลดโปสเตอร์</p><label class="drop-zone" id="generatedDropZone">อัปโหลดหรือลากไฟล์โปสเตอร์มาวาง<input id="generatedImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><img id="generatedUploadPreview" class="poster-preview hidden" alt="ตัวอย่างโปสเตอร์"><button id="saveGeneratedImageBtn" class="secondary-button hidden">บันทึกโปสเตอร์นี้</button></article>
       </div>
       <article class="content-card"><div class="card-title"><h3>Prompt สำหรับ ChatGPT Image Generation</h3><button id="copyPromptBtn" class="secondary-button">คัดลอก Prompt</button></div><textarea id="detailPrompt" rows="12" readonly></textarea></article>
@@ -166,10 +173,13 @@
     let promptTemplate = '';
     let promptStyles = [];
     let donorImageFile = null;
+    let detailDonorImageFile = null;
     let generatedImageFile = null;
     let currentDonation = null;
     let searchTimer = null;
     const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+    const DONOR_PORTRAIT_INSTRUCTION = 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.';
+    const NO_DONOR_PORTRAIT_INSTRUCTION = 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
 
     function apiUrl() {
       const url = elements.appsScriptUrl.value.trim();
@@ -223,14 +233,21 @@
     function buildPrompt(donation) {
       const style = randomPromptStyle();
       const portraitInstruction = donation.donorImageId
-        ? 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.'
-        : 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
+        ? DONOR_PORTRAIT_INSTRUCTION
+        : NO_DONOR_PORTRAIT_INSTRUCTION;
       return promptTemplate.replaceAll('[DONOR_NAME]', donation.donorName)
         .replaceAll('[DONATION_TYPE]', donation.donationType)
         .replaceAll('[DONATION_DETAIL]', donation.donationDetail)
         .replaceAll('[PORTRAIT_INSTRUCTION]', portraitInstruction)
         .replaceAll('[STYLE_NAME]', style.name)
         .replaceAll('[STYLE_DIRECTION]', style.direction);
+    }
+
+    function addDonorPortraitToPrompt(prompt) {
+      const currentPrompt = String(prompt || '');
+      if (currentPrompt.includes(DONOR_PORTRAIT_INSTRUCTION)) return currentPrompt;
+      if (currentPrompt.includes(NO_DONOR_PORTRAIT_INSTRUCTION)) return currentPrompt.replace(NO_DONOR_PORTRAIT_INSTRUCTION, DONOR_PORTRAIT_INSTRUCTION);
+      return `${DONOR_PORTRAIT_INSTRUCTION}\n\n${currentPrompt}`.trim();
     }
 
     function randomPromptStyle() {
@@ -373,7 +390,9 @@
       const donation = currentDonation; if (!donation) return;
       elements.detailDonorName.textContent = donation.donorName; elements.detailDonationType.textContent = `ประเภท: ${typeLabel(donation.donationType)}`; elements.detailDonationDetail.textContent = donation.donationDetail; elements.detailCreatedAt.textContent = `บันทึกเมื่อ ${formatDate(donation.createdAt)}`; elements.detailStatus.textContent = statusLabel(donation.publishingStatus); elements.detailStatus.className = `status-badge status-${donation.publishingStatus}`;
       showImage(elements.detailDonorImage, donation.donorImageUrl); showImage(elements.detailOriginalImage, donation.donorImageUrl, elements.noOriginalImage); showImage(elements.detailGeneratedImage, donation.generatedImageUrl, elements.noGeneratedImage);
-      elements.openDonorImageBtn.href = donation.donorImageUrl || '#'; elements.openGeneratedImageBtn.href = donation.generatedImageUrl || '#'; elements.detailPrompt.value = donation.generatedPrompt; elements.detailCaption.value = donation.caption; elements.generatedUploadPreview.classList.add('hidden'); elements.saveGeneratedImageBtn.classList.add('hidden'); generatedImageFile = null;
+      elements.openDonorImageBtn.href = donation.donorImageUrl || '#'; elements.openGeneratedImageBtn.href = donation.generatedImageUrl || '#'; elements.detailPrompt.value = donation.generatedPrompt; elements.detailCaption.value = donation.caption;
+      elements.detailDonorUploadPreview.classList.add('hidden'); elements.saveDetailDonorImageBtn.classList.add('hidden'); elements.detailDonorImageInput.value = ''; detailDonorImageFile = null;
+      elements.generatedUploadPreview.classList.add('hidden'); elements.saveGeneratedImageBtn.classList.add('hidden'); generatedImageFile = null;
       elements.facebookResult.classList.toggle('hidden', !donation.facebookPostId);
       elements.facebookResult.innerHTML = donation.facebookPostId ? `เผยแพร่แล้วเมื่อ ${formatDate(donation.facebookPublishedAt)} · <a href="${escapeHtml(donation.facebookPostUrl)}" target="_blank" rel="noopener">เปิดโพสต์ Facebook</a>` : '';
       const canPublish = donation.generatedImageId && donation.caption && !donation.facebookPostId && donation.publishingStatus !== 'publishing'; elements.publishBtn.disabled = !canPublish; elements.publishBtn.textContent = donation.facebookPostId ? 'เผยแพร่ไปยัง Facebook แล้ว' : donation.generatedImageId ? 'เผยแพร่ภาพและแคปชันไปยัง Facebook' : 'อัปโหลดโปสเตอร์ก่อนเผยแพร่';
@@ -407,6 +426,32 @@
     elements.copyCaptionBtn.addEventListener('click', () => copyText(elements.detailCaption.value, 'คัดลอกแคปชันแล้ว'));
     elements.copyDonorImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.donorImageUrl));
     elements.copyGeneratedImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.generatedImageUrl));
+
+    function selectDetailDonorFile(file) {
+      if (!file) return;
+      if (!['image/jpeg', 'image/png'].includes(file.type)) return showToast('รองรับเฉพาะไฟล์ JPG และ PNG', true);
+      if (file.size > MAX_IMAGE_BYTES) return showToast('รูปภาพต้องมีขนาดไม่เกิน 10 MB', true);
+      detailDonorImageFile = file;
+      elements.detailDonorUploadPreview.src = URL.createObjectURL(file);
+      elements.detailDonorUploadPreview.classList.remove('hidden');
+      elements.saveDetailDonorImageBtn.classList.remove('hidden');
+    }
+    elements.detailDonorImageInput.addEventListener('change', () => selectDetailDonorFile(elements.detailDonorImageInput.files[0]));
+    ['dragenter', 'dragover'].forEach((name) => elements.detailDonorDropZone.addEventListener(name, (event) => { event.preventDefault(); elements.detailDonorDropZone.classList.add('dragging'); }));
+    ['dragleave', 'drop'].forEach((name) => elements.detailDonorDropZone.addEventListener(name, (event) => { event.preventDefault(); elements.detailDonorDropZone.classList.remove('dragging'); if (name === 'drop') selectDetailDonorFile(event.dataTransfer.files[0]); }));
+    elements.saveDetailDonorImageBtn.addEventListener('click', async () => {
+      if (!detailDonorImageFile || !currentDonation) return;
+      setBusy(elements.saveDetailDonorImageBtn, true, 'กำลังอัปโหลด...');
+      try {
+        const generatedPrompt = addDonorPortraitToPrompt(currentDonation.generatedPrompt);
+        const result = await apiPost('uploadImage', { donationId: currentDonation.id, imageKind: 'donor', generatedPrompt, ...await filePayload(detailDonorImageFile) });
+        currentDonation = result.donation;
+        renderDetail();
+        showToast('บันทึกภาพผู้บริจาคกับรายการเดิมแล้ว');
+      }
+      catch (error) { showToast(error.message, true); }
+      finally { setBusy(elements.saveDetailDonorImageBtn, false, ''); }
+    });
 
     elements.saveCaptionBtn.addEventListener('click', async () => {
       if (!currentDonation) return; setBusy(elements.saveCaptionBtn, true, 'กำลังบันทึก...');
