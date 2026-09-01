@@ -31,9 +31,20 @@
   .tab { @apply rounded-lg px-4 py-2 text-sm font-medium text-violet-200 transition hover:bg-white/10 hover:text-white; }
   .tab.active { @apply bg-white font-bold text-purple-900 shadow-md; }
   .settings-card, .view-panel { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6; }
-  .settings-card summary { @apply cursor-pointer font-semibold text-slate-700; }
-  .settings-card label { @apply mt-4; }
-  .settings-card p { @apply mt-2 text-xs text-slate-500; }
+  .settings-card summary, .settings-content { @apply mx-auto max-w-4xl; }
+  .settings-card summary { @apply flex cursor-pointer list-none items-center justify-between gap-4 text-slate-700; }
+  .settings-card summary::-webkit-details-marker { @apply hidden; }
+  .settings-card[open] summary { @apply mb-5 border-b border-slate-200 pb-4; }
+  .settings-heading { @apply flex min-w-0 items-center gap-3; }
+  .settings-heading > span:last-child { @apply min-w-0; }
+  .settings-heading strong { @apply block text-base font-bold text-slate-800 md:text-lg; }
+  .settings-heading small { @apply mt-0.5 block text-xs font-normal text-slate-500; }
+  .settings-icon { @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-lg text-violet-700; }
+  .settings-chevron { @apply text-2xl leading-none text-slate-400 transition-transform; }
+  .settings-card[open] .settings-chevron { @apply rotate-180; }
+  .settings-grid { @apply grid gap-4 md:grid-cols-2; }
+  .settings-grid label { @apply space-y-1; }
+  .settings-note { @apply mt-4 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500; }
   .section-heading { @apply mb-5 flex flex-col gap-2 border-b border-slate-200 pb-4 md:flex-row md:items-end md:justify-between; }
   .section-heading > div { @apply flex items-center gap-3; }
   .section-heading span { @apply text-2xl font-bold text-amber-500; }

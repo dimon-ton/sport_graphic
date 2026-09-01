@@ -21,12 +21,24 @@
     </header>
 
     <details class="settings-card">
-      <summary>ตั้งค่า Google Apps Script</summary>
-      <label for="appsScriptUrl">Web App URL</label>
-      <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <label for="adminAccessKey">รหัสผู้ดูแลระบบ</label>
-      <input type="password" id="adminAccessKey" autocomplete="current-password" placeholder="ADMIN_ACCESS_KEY">
-      <p>ข้อมูลรับรอง Facebook เก็บใน Script Properties ฝั่งเซิร์ฟเวอร์เท่านั้น</p>
+      <summary>
+        <span class="settings-heading">
+          <span class="settings-icon" aria-hidden="true">⚙</span>
+          <span><strong>ตั้งค่า Google Apps Script</strong><small>การเชื่อมต่อและสิทธิ์ผู้ดูแลระบบ</small></span>
+        </span>
+        <span class="settings-chevron" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="settings-content">
+        <div class="settings-grid">
+          <label for="appsScriptUrl">Web App URL
+            <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+          </label>
+          <label for="adminAccessKey">รหัสผู้ดูแลระบบ
+            <input type="password" id="adminAccessKey" autocomplete="current-password" placeholder="ADMIN_ACCESS_KEY">
+          </label>
+        </div>
+        <p class="settings-note">ข้อมูลรับรอง Facebook เก็บใน Script Properties ฝั่งเซิร์ฟเวอร์เท่านั้น</p>
+      </div>
     </details>
 
     <section id="createView" class="view-panel">
