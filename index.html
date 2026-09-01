@@ -56,7 +56,14 @@
 
         <div class="upload-card">
           <div><strong>ภาพผู้บริจาค (ไม่บังคับ)</strong><p>ใช้เป็น PERSON / IDENTITY REFERENCE ใน Prompt</p></div>
-          <input type="file" id="donorImageInput" accept="image/*" capture="environment">
+          <div class="image-source-grid">
+            <label class="image-source-button">📷 ถ่ายภาพด้วยกล้อง
+              <input type="file" id="donorCameraInput" accept="image/*" capture="environment">
+            </label>
+            <label class="image-source-button secondary">🖼️ เลือกจากเครื่อง
+              <input type="file" id="donorFileInput" accept="image/jpeg,image/png,image/webp,image/gif">
+            </label>
+          </div>
           <img id="donorPreview" class="image-preview hidden" alt="ตัวอย่างภาพผู้บริจาค">
         </div>
 
@@ -217,10 +224,12 @@
     elements.adminAccessKey.addEventListener('change', () => sessionStorage.setItem('adminAccessKey', elements.adminAccessKey.value));
     fetch('prompt_template.txt', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.text(); }).then((text) => { promptTemplate = text.trim(); }).catch(() => showToast('โหลด Prompt Template ไม่สำเร็จ', true));
 
-    elements.donorImageInput.addEventListener('change', () => {
-      donorImageFile = elements.donorImageInput.files[0] || null;
+    function selectDonorImage(file) {
+      donorImageFile = file || null;
       if (donorImageFile) { elements.donorPreview.src = URL.createObjectURL(donorImageFile); elements.donorPreview.classList.remove('hidden'); }
-    });
+    }
+    elements.donorCameraInput.addEventListener('change', () => selectDonorImage(elements.donorCameraInput.files[0]));
+    elements.donorFileInput.addEventListener('change', () => selectDonorImage(elements.donorFileInput.files[0]));
 
     elements.donationForm.addEventListener('submit', async (event) => {
       event.preventDefault();
