@@ -55,16 +55,17 @@
         </div>
 
         <div class="upload-card">
-          <div><strong>ภาพผู้บริจาค (ไม่บังคับ)</strong><p>ใช้เป็น PERSON / IDENTITY REFERENCE ใน Prompt</p></div>
-          <div class="image-source-grid">
-            <label class="image-source-button">📷 ถ่ายภาพด้วยกล้อง
-              <input type="file" id="donorCameraInput" accept="image/*" capture="environment">
-            </label>
-            <label class="image-source-button secondary">🖼️ เลือกจากเครื่อง
-              <input type="file" id="donorFileInput" accept="image/jpeg,image/png,image/webp,image/gif">
-            </label>
+          <div class="upload-copy"><strong>ภาพผู้บริจาค (ไม่บังคับ)</strong><p>ใช้เป็นภาพอ้างอิงบุคคลสำหรับ AI</p></div>
+          <div id="donorEmptyState" class="donor-empty-state">
+            <button id="addDonorImageBtn" class="image-add-button" type="button">🖼️ เพิ่มภาพผู้บริจาค</button>
+            <small>JPG, PNG · สูงสุด 10 MB</small>
           </div>
-          <img id="donorPreview" class="image-preview hidden" alt="ตัวอย่างภาพผู้บริจาค">
+          <div id="donorSelectedState" class="donor-selected-state hidden">
+            <img id="donorPreview" class="image-preview" alt="ตัวอย่างภาพผู้บริจาค">
+            <div><strong id="donorImageName"></strong><small>พร้อมใช้เป็นภาพอ้างอิงบุคคล</small><button id="changeDonorImageBtn" class="secondary-button" type="button">เปลี่ยนภาพ</button></div>
+          </div>
+          <input class="hidden" type="file" id="donorCameraInput" accept="image/jpeg,image/png" capture="environment">
+          <input class="hidden" type="file" id="donorFileInput" accept="image/jpeg,image/png">
         </div>
 
         <button id="submitBtn" class="primary-button" type="submit">
@@ -107,6 +108,16 @@
     </div>
   </dialog>
 
+  <dialog id="imageSourceDialog" class="image-source-dialog">
+    <div class="sheet-panel">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h2>เพิ่มภาพผู้บริจาค</h2>
+      <button id="takePhotoBtn" class="sheet-action" type="button"><span>📷</span><span>ถ่ายภาพด้วยกล้อง</span></button>
+      <button id="choosePhotoBtn" class="sheet-action" type="button"><span>🖼️</span><span>เลือกรูปจากเครื่อง</span></button>
+      <button id="cancelImageSourceBtn" class="sheet-cancel" type="button">ยกเลิก</button>
+    </div>
+  </dialog>
+
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script>
@@ -123,6 +134,7 @@
     let generatedImageFile = null;
     let currentDonation = null;
     let searchTimer = null;
+    const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
     function apiUrl() {
       const url = elements.appsScriptUrl.value.trim();
@@ -224,10 +236,26 @@
     elements.adminAccessKey.addEventListener('change', () => sessionStorage.setItem('adminAccessKey', elements.adminAccessKey.value));
     fetch('prompt_template.txt', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.text(); }).then((text) => { promptTemplate = text.trim(); }).catch(() => showToast('โหลด Prompt Template ไม่สำเร็จ', true));
 
-    function selectDonorImage(file) {
-      donorImageFile = file || null;
-      if (donorImageFile) { elements.donorPreview.src = URL.createObjectURL(donorImageFile); elements.donorPreview.classList.remove('hidden'); }
+    function openImageSourceSheet() {
+      elements.imageSourceDialog.showModal();
     }
+
+    function selectDonorImage(file) {
+      if (!file) return;
+      if (!['image/jpeg', 'image/png'].includes(file.type)) return showToast('รองรับเฉพาะไฟล์ JPG และ PNG', true);
+      if (file.size > MAX_IMAGE_BYTES) return showToast('รูปภาพต้องมีขนาดไม่เกิน 10 MB', true);
+      donorImageFile = file;
+      elements.donorPreview.src = URL.createObjectURL(file);
+      elements.donorImageName.textContent = file.name || 'ภาพจากกล้อง';
+      elements.donorEmptyState.classList.add('hidden');
+      elements.donorSelectedState.classList.remove('hidden');
+    }
+    elements.addDonorImageBtn.addEventListener('click', openImageSourceSheet);
+    elements.changeDonorImageBtn.addEventListener('click', openImageSourceSheet);
+    elements.takePhotoBtn.addEventListener('click', () => { elements.imageSourceDialog.close(); elements.donorCameraInput.click(); });
+    elements.choosePhotoBtn.addEventListener('click', () => { elements.imageSourceDialog.close(); elements.donorFileInput.click(); });
+    elements.cancelImageSourceBtn.addEventListener('click', () => elements.imageSourceDialog.close());
+    elements.imageSourceDialog.addEventListener('click', (event) => { if (event.target === elements.imageSourceDialog) elements.imageSourceDialog.close(); });
     elements.donorCameraInput.addEventListener('change', () => selectDonorImage(elements.donorCameraInput.files[0]));
     elements.donorFileInput.addEventListener('change', () => selectDonorImage(elements.donorFileInput.files[0]));
 
@@ -247,7 +275,7 @@
         }
         donation.generatedPrompt = buildPrompt(donation); donation.caption = buildCaption(donation);
         const result = await apiPost('createDonation', donation);
-        elements.donationForm.reset(); donorImageFile = null; elements.donorPreview.classList.add('hidden');
+        elements.donationForm.reset(); donorImageFile = null; elements.donorEmptyState.classList.remove('hidden'); elements.donorSelectedState.classList.add('hidden');
         showToast(result.duplicate ? 'รายการนี้ถูกบันทึกไว้แล้ว' : 'บันทึกรายการเรียบร้อยแล้ว');
         openDonation(result.donation.id);
       } catch (error) { showToast(error.message, true); }

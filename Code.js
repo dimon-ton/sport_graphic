@@ -113,11 +113,12 @@ function uploadImage_(payload) {
   const imageKind = String(payload.imageKind || 'donor');
   if (imageKind !== 'donor' && imageKind !== 'generated') throw new Error('Invalid image kind.');
   const imageData = requiredString_(payload.imageBase64, 'imageBase64');
-  if (imageData.length > 14 * 1024 * 1024) throw new Error('Image is too large. Maximum encoded size is 14 MB.');
   const mimeType = String(payload.imageMimeType || 'image/jpeg');
   if (!/^image\/(jpeg|png|webp|gif)$/i.test(mimeType)) throw new Error('Unsupported image type.');
+  const decodedImage = Utilities.base64Decode(imageData);
+  if (decodedImage.length > 10 * 1024 * 1024) throw new Error('Image is too large. Maximum size is 10 MB.');
   const file = getImageFolder_(imageKind).createFile(Utilities.newBlob(
-    Utilities.base64Decode(imageData), mimeType,
+    decodedImage, mimeType,
     sanitizeFileName_(payload.imageName || imageKind + '-image.jpg')
   ));
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
