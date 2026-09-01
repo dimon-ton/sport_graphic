@@ -141,6 +141,7 @@
     };
     const elements = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map((element) => [element.id, element]));
     let promptTemplate = '';
+    let promptStyles = [];
     let donorImageFile = null;
     let generatedImageFile = null;
     let currentDonation = null;
@@ -197,13 +198,26 @@
     }
 
     function buildPrompt(donation) {
+      const style = randomPromptStyle();
       const portraitInstruction = donation.donorImageId
         ? 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.'
         : 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
       return promptTemplate.replaceAll('[DONOR_NAME]', donation.donorName)
         .replaceAll('[DONATION_TYPE]', donation.donationType)
         .replaceAll('[DONATION_DETAIL]', donation.donationDetail)
-        .replaceAll('[PORTRAIT_INSTRUCTION]', portraitInstruction);
+        .replaceAll('[PORTRAIT_INSTRUCTION]', portraitInstruction)
+        .replaceAll('[STYLE_NAME]', style.name)
+        .replaceAll('[STYLE_DIRECTION]', style.direction);
+    }
+
+    function randomPromptStyle() {
+      if (!promptStyles.length) throw new Error('Prompt Styles are not loaded.');
+      if (window.crypto && window.crypto.getRandomValues) {
+        const randomValue = new Uint32Array(1);
+        window.crypto.getRandomValues(randomValue);
+        return promptStyles[randomValue[0] % promptStyles.length];
+      }
+      return promptStyles[Math.floor(Math.random() * promptStyles.length)];
     }
 
     function buildCaption(donation) {
@@ -248,7 +262,14 @@
     elements.appsScriptUrl.addEventListener('change', () => localStorage.setItem('appsScriptUrl', elements.appsScriptUrl.value.trim()));
     elements.adminAccessKey.value = sessionStorage.getItem('adminAccessKey') || '';
     elements.adminAccessKey.addEventListener('change', () => sessionStorage.setItem('adminAccessKey', elements.adminAccessKey.value));
-    fetch('prompt_template.txt', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.text(); }).then((text) => { promptTemplate = text.trim(); }).catch(() => showToast('โหลด Prompt Template ไม่สำเร็จ', true));
+    Promise.all([
+      fetch('prompt_template.txt', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.text(); }),
+      fetch('prompt_styles.json', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.json(); })
+    ]).then(([template, styles]) => {
+      if (!Array.isArray(styles) || styles.length !== 20 || styles.some((style) => !style.name || !style.direction)) throw new Error();
+      promptTemplate = template.trim();
+      promptStyles = styles;
+    }).catch(() => showToast('โหลด Prompt Template หรือ Prompt Styles ไม่สำเร็จ', true));
 
     function openImageSourceSheet() {
       elements.imageSourceDialog.showModal();

@@ -109,29 +109,19 @@ Use Footer message from FIXED SCHOOL INFORMATION exactly.
 
 DESIGN DIRECTION:
 
-Create a luxurious, modern and celebratory school appreciation graphic.
+Selected visual style: [STYLE_NAME]
 
-Use a deep royal-purple gradient background with subtle magenta and violet highlights.
+The selected visual style is control metadata only. Never display its name or
+these design instructions as text on the poster.
 
-Add elegant golden confetti floating around the composition, soft glowing bokeh lights, tiny luminous particles, and subtle cinematic light effects.
-
-Use a premium purple-and-gold color palette:
-
-- deep royal purple
-
-- violet
-
-- magenta accents
-
-- metallic champagne gold
-
-- white
+[STYLE_DIRECTION]
 
 At the top, place the school name prominently in bold white Thai typography with subtle dimensional shadowing.
 
 Place “ขอขอบพระคุณ” underneath in large white Thai typography.
 
-Make the donor’s name the main typographic highlight using elegant metallic-gold Thai lettering with subtle depth, glow, and premium embossed appearance.
+Make the donor’s name the main typographic highlight using premium Thai lettering
+that follows the selected visual style while remaining highly legible.
 
 Place the event description below the donor name in clean white typography.
 
@@ -149,15 +139,17 @@ Use flattering professional lighting, subtle edge lighting, natural skin texture
 
 Do not make the person look illustrated, cartoonish, plastic, or AI-generated.
 
-Behind the donor, place a symmetrical elegant golden laurel wreath, framing the person without covering the face or body.
+Behind the donor, place an elegant symmetrical framing motif appropriate to the
+selected visual style, without covering the face or body.
 
-Add soft purple glow and bokeh behind the person to create separation from the background.
+Use restrained glow, lighting, or tonal contrast appropriate to the selected
+visual style to separate the person from the background.
 
 DONATION DETAIL CARD:
 
-Create a large premium white ticket-shaped information card across the lower-middle section.
-
-Use softly rounded corners, elegant curved ticket-style side cutouts, thin metallic-gold border, and a subtle warm glow.
+Create a large premium light-toned information card across the lower-middle
+section. Its shape, border, and finish should follow the selected visual style,
+while retaining excellent contrast and generous internal spacing.
 
 Inside the card, follow DONATION TYPE HANDLING and the STRICT DONATION DETAIL
 RULE. Render only the selected Thai label and the immutable Donation detail.
@@ -183,15 +175,8 @@ Use Footer message from FIXED SCHOOL INFORMATION exactly.
 
 Use bold white Thai typography.
 
-Finish the bottom edge with elegant layered geometric ribbons in:
-
-- deep purple
-
-- metallic gold
-
-- vivid magenta
-
-Maintain the polished visual language of the reference.
+Finish the bottom edge with a polished decorative treatment that follows the
+selected visual style and maintains the visual language of the reference.
 
 COMPOSITION:
 
@@ -231,7 +216,7 @@ HIGH QUALITY REQUIREMENTS:
 
 - realistic portrait integration
 
-- elegant metallic gold effects
+- refined decorative effects appropriate to the selected visual style
 
 - balanced visual hierarchy
 
