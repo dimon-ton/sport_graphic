@@ -116,6 +116,32 @@ these design instructions as text on the poster.
 
 [STYLE_DIRECTION]
 
+REQUIRED SCHOOL SPORTS-DAY IDENTITY:
+
+Regardless of the selected visual style, the finished poster must immediately
+feel like an appreciation poster for a Thai school internal sports day
+(กีฬาสี), not a generic luxury, corporate, or ceremonial donor poster.
+
+Integrate clear but tasteful school sports-day visual cues throughout the
+composition. Use several of the following as supporting design elements:
+
+- running-track lanes, athletic-field markings, or a softly lit school stadium
+- flowing team-color flags, ribbons, pennants, or fabric accents in coordinated
+  red, blue, green, and yellow
+- subtle silhouettes or graphic motifs of student athletes running, competing,
+  or celebrating together
+- cheering-stand energy, stadium lights, victory arcs, medals, trophies, or
+  laurel details
+- dynamic motion lines and festive color-team particles that suggest friendly
+  inter-team competition
+
+Blend these elements naturally into the selected visual style and keep them
+secondary to the donor, donation information, and required text. The
+multi-color accents should feel coordinated and premium rather than rainbow-like
+or childish. Do not invent team names, scores, mascots, school logos, uniforms,
+event dates, numbers, or any additional text. Do not depict professional sports
+teams or a single specific sport as the event's sole focus.
+
 At the top, place the school name prominently in bold white Thai typography with subtle dimensional shadowing.
 
 Place “ขอขอบพระคุณ” underneath in large white Thai typography.
@@ -200,7 +226,9 @@ Maintain strong visual hierarchy:
 
 8. Tax-deduction message
 
-The design should feel professional enough for an official school Facebook post while still looking festive, prestigious, warm, and appreciative.
+The design should feel professional enough for an official school Facebook post
+while still looking festive, prestigious, warm, appreciative, and unmistakably
+connected to a school color-sports event.
 
 HIGH QUALITY REQUIREMENTS:
 
@@ -217,6 +245,10 @@ HIGH QUALITY REQUIREMENTS:
 - realistic portrait integration
 
 - refined decorative effects appropriate to the selected visual style
+
+- immediately recognizable Thai school sports-day atmosphere
+
+- coordinated team-color accents and clear athletic-event visual cues
 
 - balanced visual hierarchy
 
