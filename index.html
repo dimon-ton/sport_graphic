@@ -101,6 +101,13 @@
     </section>
   </main>
 
+  <div id="detailLoadingOverlay" class="detail-loading-overlay hidden" role="status" aria-live="polite" aria-label="กำลังโหลดรายละเอียดการบริจาค">
+    <div class="detail-loading-card">
+      <span class="detail-loading-spinner" aria-hidden="true"></span>
+      <p>กำลังโหลดรายละเอียด...</p>
+    </div>
+  </div>
+
   <dialog id="detailDialog" class="detail-dialog">
     <div class="dialog-header"><div class="dialog-header-leading"><button id="openDeleteDialogBtn" class="danger-button" type="button">ลบรายการนี้</button><div><p class="eyebrow">DONATION RECORD</p><h2 id="detailDonorName"></h2></div></div><button id="closeDialogBtn" class="icon-button" aria-label="ปิด">×</button></div>
     <div id="detailContent" class="detail-content">
@@ -345,8 +352,21 @@
     }
 
     async function openDonation(id) {
-      try { const result = await apiPost('getDonation', { id }); currentDonation = result.donation; renderDetail(); elements.detailDialog.showModal(); }
+      if (!elements.detailLoadingOverlay.classList.contains('hidden')) return;
+      elements.detailLoadingOverlay.classList.remove('hidden');
+      elements.donationList.setAttribute('aria-busy', 'true');
+      try {
+        const result = await apiPost('getDonation', { id });
+        currentDonation = result.donation;
+        renderDetail();
+        elements.detailLoadingOverlay.classList.add('hidden');
+        elements.detailDialog.showModal();
+      }
       catch (error) { showToast(error.message, true); }
+      finally {
+        elements.detailLoadingOverlay.classList.add('hidden');
+        elements.donationList.removeAttribute('aria-busy');
+      }
     }
 
     function renderDetail() {
