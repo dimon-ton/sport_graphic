@@ -42,7 +42,7 @@
   .settings-icon { @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-lg text-violet-700; }
   .settings-chevron { @apply text-2xl leading-none text-slate-400 transition-transform; }
   .settings-card[open] .settings-chevron { @apply rotate-180; }
-  .settings-grid { @apply grid gap-4 md:grid-cols-2; }
+  .settings-grid { @apply grid gap-4 md:grid-cols-[2fr_1fr]; }
   .settings-grid label { @apply space-y-1; }
   .settings-note { @apply mt-4 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500; }
   .section-heading { @apply mb-5 flex flex-col gap-2 border-b border-slate-200 pb-4 md:flex-row md:items-end md:justify-between; }
