@@ -102,7 +102,7 @@
   </main>
 
   <dialog id="detailDialog" class="detail-dialog">
-    <div class="dialog-header"><div><p class="eyebrow">DONATION RECORD</p><h2 id="detailDonorName"></h2></div><button id="closeDialogBtn" class="icon-button" aria-label="ปิด">×</button></div>
+    <div class="dialog-header"><div class="dialog-header-leading"><button id="openDeleteDialogBtn" class="danger-button" type="button">ลบรายการนี้</button><div><p class="eyebrow">DONATION RECORD</p><h2 id="detailDonorName"></h2></div></div><button id="closeDialogBtn" class="icon-button" aria-label="ปิด">×</button></div>
     <div id="detailContent" class="detail-content">
       <div class="record-summary">
         <img id="detailDonorImage" class="record-image hidden" alt="ภาพผู้บริจาค">
@@ -116,7 +116,6 @@
       <article class="content-card"><div class="card-title"><h3>แคปชัน Facebook</h3><div><button id="saveCaptionBtn" class="text-button">บันทึกการแก้ไข</button><button id="copyCaptionBtn" class="secondary-button">คัดลอกแคปชัน</button></div></div><textarea id="detailCaption" rows="12"></textarea></article>
       <div id="facebookResult" class="facebook-result hidden"></div>
       <button id="publishBtn" class="facebook-button">เผยแพร่ภาพและแคปชันไปยัง Facebook</button>
-      <div class="delete-action-row"><button id="openDeleteDialogBtn" class="danger-button" type="button">ลบรายการนี้</button></div>
     </div>
   </dialog>
 
