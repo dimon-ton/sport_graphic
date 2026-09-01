@@ -46,6 +46,7 @@ function route_(payload) {
   if (action === 'getDonation') return { success: true, donation: getDonationById_(payload.id) };
   if (action === 'createDonation') return createDonation_(payload);
   if (action === 'updateDonation') return updateDonation_(payload);
+  if (action === 'deleteDonation') return deleteDonation_(payload.id);
   if (action === 'uploadImage') return uploadImage_(payload);
   if (action === 'publishFacebook') return publishFacebook_(payload);
   throw new Error('Unknown action.');
@@ -226,6 +227,24 @@ function getDonationById_(id) {
   });
   if (!donation) throw new Error('Donation record not found.');
   return donation;
+}
+
+function deleteDonation_(id) {
+  const value = requiredString_(id, 'id');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const sheet = getDonationsSheet_();
+    const values = sheet.getDataRange().getDisplayValues();
+    const rowIndex = values.findIndex(function (row, index) {
+      return index > 0 && row[0] === value;
+    });
+    if (rowIndex < 1) throw new Error('Donation record not found.');
+    sheet.deleteRow(rowIndex + 1);
+    return { success: true, deletedId: value };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function mutateDonation_(id, callback) {

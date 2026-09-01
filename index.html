@@ -116,6 +116,23 @@
       <article class="content-card"><div class="card-title"><h3>แคปชัน Facebook</h3><div><button id="saveCaptionBtn" class="text-button">บันทึกการแก้ไข</button><button id="copyCaptionBtn" class="secondary-button">คัดลอกแคปชัน</button></div></div><textarea id="detailCaption" rows="12"></textarea></article>
       <div id="facebookResult" class="facebook-result hidden"></div>
       <button id="publishBtn" class="facebook-button">เผยแพร่ภาพและแคปชันไปยัง Facebook</button>
+      <div class="delete-action-row"><button id="openDeleteDialogBtn" class="danger-button" type="button">ลบรายการนี้</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="deleteConfirmationDialog" class="confirmation-dialog" aria-labelledby="deleteDialogTitle" aria-describedby="deleteWarningMessage">
+    <div class="confirmation-panel">
+      <div class="confirmation-icon" aria-hidden="true">!</div>
+      <div>
+        <p class="eyebrow">คำเตือน</p>
+        <h2 id="deleteDialogTitle">ลบรายการบริจาค?</h2>
+      </div>
+      <p id="deleteWarningMessage" class="confirmation-message"></p>
+      <p class="confirmation-note">ข้อมูลรายการจะถูกลบออกจากตารางอย่างถาวรและไม่สามารถย้อนกลับได้ แต่ไฟล์ภาพที่อัปโหลดไว้จะยังคงอยู่ใน Google Drive</p>
+      <div class="confirmation-actions">
+        <button id="cancelDeleteBtn" class="secondary-button" type="button">ยกเลิก</button>
+        <button id="confirmDeleteBtn" class="danger-button danger-button-solid" type="button">ยืนยันการลบ</button>
+      </div>
     </div>
   </dialog>
 
@@ -346,6 +363,27 @@
     function showImage(image, url, emptyMessage) { image.classList.toggle('hidden', !url); if (url) image.src = url; if (emptyMessage) emptyMessage.classList.toggle('hidden', Boolean(url)); }
     elements.closeDialogBtn.addEventListener('click', () => elements.detailDialog.close());
     elements.detailDialog.addEventListener('click', (event) => { if (event.target === elements.detailDialog) elements.detailDialog.close(); });
+    elements.openDeleteDialogBtn.addEventListener('click', () => {
+      if (!currentDonation) return;
+      elements.deleteWarningMessage.textContent = `คุณกำลังจะลบรายการของ “${currentDonation.donorName}”`;
+      elements.deleteConfirmationDialog.showModal();
+    });
+    elements.cancelDeleteBtn.addEventListener('click', () => elements.deleteConfirmationDialog.close());
+    elements.deleteConfirmationDialog.addEventListener('click', (event) => { if (event.target === elements.deleteConfirmationDialog) elements.deleteConfirmationDialog.close(); });
+    elements.confirmDeleteBtn.addEventListener('click', async () => {
+      if (!currentDonation) return elements.deleteConfirmationDialog.close();
+      const deletedId = currentDonation.id;
+      setBusy(elements.confirmDeleteBtn, true, 'กำลังลบ...');
+      try {
+        await apiPost('deleteDonation', { id: deletedId });
+        elements.deleteConfirmationDialog.close();
+        elements.detailDialog.close();
+        currentDonation = null;
+        showToast('ลบรายการบริจาคแล้ว');
+        await loadDonations();
+      } catch (error) { showToast(error.message, true); }
+      finally { setBusy(elements.confirmDeleteBtn, false, ''); }
+    });
     elements.copyPromptBtn.addEventListener('click', () => copyText(elements.detailPrompt.value, 'คัดลอก Prompt แล้ว'));
     elements.copyCaptionBtn.addEventListener('click', () => copyText(elements.detailCaption.value, 'คัดลอกแคปชันแล้ว'));
     elements.copyDonorImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.donorImageUrl));

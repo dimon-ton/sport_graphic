@@ -115,6 +115,16 @@
   .facebook-button { @apply bg-[#1877f2] hover:bg-[#1465cf]; }
   .facebook-result { @apply rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800; }
   .facebook-result a { @apply font-semibold underline; }
+  .delete-action-row { @apply flex justify-start border-t border-slate-200 pt-5; }
+  .danger-button { @apply rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-400 hover:bg-red-50; }
+  .danger-button-solid { @apply border-red-700 bg-red-700 text-white hover:border-red-800 hover:bg-red-800; }
+  .confirmation-dialog { @apply m-auto w-[min(440px,90vw)] rounded-2xl border-0 bg-white p-0 shadow-2xl backdrop:bg-slate-950/60; }
+  .confirmation-panel { @apply space-y-4 p-6; }
+  .confirmation-icon { @apply flex h-11 w-11 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-red-700; }
+  .confirmation-panel h2 { @apply mt-1 text-xl font-bold text-slate-900; }
+  .confirmation-message { @apply font-semibold text-slate-800; }
+  .confirmation-note { @apply rounded-xl bg-red-50 p-3 text-sm leading-relaxed text-red-800; }
+  .confirmation-actions { @apply flex justify-end gap-3 pt-2; }
   .toast { @apply fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-xl; }
   .toast.error { @apply bg-red-700; }
 }
