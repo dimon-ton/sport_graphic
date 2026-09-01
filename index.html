@@ -3,272 +3,309 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบสร้างสื่อและข้อความขอบคุณผู้บริจาค (OpenRouter & Facebook)</title>
+  <title>ระบบจัดการสื่อขอบคุณผู้บริจาค</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-slate-100 min-h-screen p-3 md:p-6 flex justify-center items-center">
-  <div class="bg-white w-full max-w-2xl rounded-3xl shadow-xl p-6 space-y-6">
-    
-    <div class="text-center">
-      <h1 class="text-2xl font-bold text-slate-800">ขอบคุณผู้สนับสนุนกีฬาสี</h1>
-      <p class="text-sm text-slate-500">กรอกข้อมูล ถ่ายภาพ ระบบจะเจน Prompt สร้างรูป และแคปชัน Facebook พร้อมบันทึกข้อมูลลง Google Sheets</p>
-    </div>
-
-    <details class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-      <summary class="text-sm font-medium text-slate-700 cursor-pointer user-select-none">ตั้งค่า Google Apps Script (จำเป็น)</summary>
-      <div class="pt-3">
-        <input type="url" id="appsScriptUrl" placeholder="วาง URL ของ Google Apps Script Web App ที่นี่" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
-        <p class="text-xs text-slate-400 mt-1.5">API Key จะเก็บและใช้งานฝั่ง Google Apps Script เท่านั้น ไม่ถูกส่งมายังเบราว์เซอร์</p>
+<body class="app-body">
+  <main class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">โรงเรียนบ้านโพนแท่น</p>
+        <h1>ระบบจัดการสื่อขอบคุณผู้บริจาค</h1>
+        <p>บันทึกข้อมูล สร้าง Prompt จัดเก็บโปสเตอร์ และเผยแพร่ Facebook ในที่เดียว</p>
       </div>
+      <nav class="tabs" aria-label="หน้าหลัก">
+        <button class="tab active" data-view="create">เพิ่มรายการ</button>
+        <button class="tab" data-view="history">ประวัติการบริจาค</button>
+      </nav>
+    </header>
+
+    <details class="settings-card">
+      <summary>ตั้งค่า Google Apps Script</summary>
+      <label for="appsScriptUrl">Web App URL</label>
+      <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <label for="adminAccessKey">รหัสผู้ดูแลระบบ</label>
+      <input type="password" id="adminAccessKey" autocomplete="current-password" placeholder="ADMIN_ACCESS_KEY">
+      <p>ข้อมูลรับรอง Facebook เก็บใน Script Properties ฝั่งเซิร์ฟเวอร์เท่านั้น</p>
     </details>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-      <div>
-        <label class="block text-sm font-medium text-blue-900">ชื่อผู้บริจาค / หน่วยงาน</label>
-        <input type="text" id="donorName" placeholder="เช่น ร้าน ก.การค้า หรือ คุณสมชาย" class="mt-1 w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-blue-900">ประเภทการบริจาค</label>
-        <select id="donationType" class="mt-1 w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
-          <option value="money">เงิน</option>
-          <option value="in-kind">สิ่งของ</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-blue-900">รายละเอียดการบริจาค</label>
-        <input type="text" id="donationDetail" placeholder="เช่น 2,000 บาท หรือ น้ำดื่ม 10 แพ็ก" class="mt-1 w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
-      </div>
-    </div>
-
-    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-      <label class="block text-sm font-medium text-slate-700 mb-2">ภาพบรรยากาศ / ภาพถ่ายมอบของ (เพื่อช่วย AI วิเคราะห์ธีม)</label>
-      <input type="file" id="imageInput" accept="image/*" capture="environment" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200">
-      
-      <div id="previewContainer" class="mt-3 hidden">
-        <img id="imagePreview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border border-slate-300">
-      </div>
-    </div>
-
-    <button id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg transition duration-200 flex justify-center items-center gap-2">
-      <span id="submitBtnText">ประมวลผลด้วย OpenRouter</span>
-    </button>
-
-    <div id="resultBox" class="hidden space-y-4 pt-4 border-t border-slate-200">
-      
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-        <div class="flex justify-between items-center">
-          <h3 class="text-sm font-bold text-slate-800">1. Prompt สำหรับสร้างรูป (DALL-E 3)</h3>
-          <button id="copyPromptBtn" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded-md">คัดลอก Prompt</button>
+    <section id="createView" class="view-panel">
+      <form id="donationForm">
+        <div class="section-heading">
+          <div><span>01</span><h2>ข้อมูลผู้บริจาค</h2></div>
+          <p>ระบบจะเก็บข้อความตามที่กรอกทุกตัวอักษร โดยไม่เติมหน่วยอัตโนมัติ</p>
         </div>
-        <textarea id="outputPrompt" rows="4" class="w-full border border-slate-200 bg-white rounded-lg p-3 text-xs text-slate-700 font-mono focus:outline-none" readonly></textarea>
-        <p class="text-xs text-amber-700">นำ Prompt นี้ไปวางใน DALL-E 3 หรือ ChatGPT เพื่อเจนรูปภาพขอบคุณที่สวยงาม</p>
-      </div>
-
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-        <div class="flex justify-between items-center">
-          <h3 class="text-sm font-bold text-slate-800">2. แคปชันขอบคุณสำหรับ Facebook</h3>
-          <button id="copyCaptionBtn" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded-md">คัดลอกแคปชัน</button>
+        <div class="form-grid">
+          <label>ชื่อผู้บริจาค / หน่วยงาน
+            <input type="text" id="donorName" required placeholder="เช่น ร้าน ก.การค้า หรือ คุณสมชาย">
+          </label>
+          <label>ประเภทการบริจาค
+            <select id="donationType" required>
+              <option value="money">เงิน</option>
+              <option value="in-kind">สิ่งของ</option>
+            </select>
+          </label>
+          <label class="wide">รายละเอียดการบริจาค
+            <input type="text" id="donationDetail" required placeholder="เช่น 2,000 บาท หรือ น้ำดื่ม 10 แพ็ค">
+            <small>กรอกหน่วยที่ต้องการให้แสดงด้วย ระบบจะไม่เติม “บาท” หรือหน่วยอื่น</small>
+          </label>
+          <label class="wide">หมายเหตุ (ไม่บังคับ)
+            <textarea id="notes" rows="2" placeholder="ข้อมูลภายในเพิ่มเติม"></textarea>
+          </label>
         </div>
-        <div id="outputCaption" class="w-full border border-slate-200 bg-white rounded-lg p-3 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed"></div>
-      </div>
 
+        <div class="upload-card">
+          <div><strong>ภาพผู้บริจาค (ไม่บังคับ)</strong><p>ใช้เป็น PERSON / IDENTITY REFERENCE ใน Prompt</p></div>
+          <input type="file" id="donorImageInput" accept="image/jpeg,image/png,image/webp,image/gif">
+          <img id="donorPreview" class="image-preview hidden" alt="ตัวอย่างภาพผู้บริจาค">
+        </div>
+
+        <button id="submitBtn" class="primary-button" type="submit">
+          <span id="submitBtnText">บันทึกรายการและสร้างเนื้อหา</span>
+        </button>
+      </form>
+    </section>
+
+    <section id="historyView" class="view-panel hidden">
+      <div class="section-heading history-heading">
+        <div><span>02</span><h2>ประวัติการบริจาค</h2></div>
+        <button id="refreshBtn" class="secondary-button">รีเฟรช</button>
+      </div>
+      <div class="filters">
+        <input id="searchInput" type="search" placeholder="ค้นหาชื่อ รายละเอียด หรือ ID">
+        <select id="typeFilter"><option value="">ทุกประเภท</option><option value="money">เงิน</option><option value="in-kind">สิ่งของ</option></select>
+        <select id="statusFilter"><option value="">ทุกสถานะ</option><option value="draft">รอโปสเตอร์</option><option value="ready">พร้อมเผยแพร่</option><option value="published">เผยแพร่แล้ว</option><option value="publish_failed">เผยแพร่ไม่สำเร็จ</option></select>
+      </div>
+      <div id="historyLoading" class="empty-state hidden">กำลังโหลดข้อมูล...</div>
+      <div id="donationList" class="donation-list"></div>
+      <div id="historyEmpty" class="empty-state hidden">ยังไม่พบรายการบริจาค</div>
+    </section>
+  </main>
+
+  <dialog id="detailDialog" class="detail-dialog">
+    <div class="dialog-header"><div><p class="eyebrow">DONATION RECORD</p><h2 id="detailDonorName"></h2></div><button id="closeDialogBtn" class="icon-button" aria-label="ปิด">×</button></div>
+    <div id="detailContent" class="detail-content">
+      <div class="record-summary">
+        <img id="detailDonorImage" class="record-image hidden" alt="ภาพผู้บริจาค">
+        <div><p id="detailDonationType"></p><strong id="detailDonationDetail"></strong><small id="detailCreatedAt"></small><span id="detailStatus" class="status-badge"></span></div>
+      </div>
+      <div class="media-grid">
+        <article><div class="card-title"><h3>ภาพต้นฉบับ</h3><div><button id="copyDonorImageBtn" class="text-button">คัดลอก</button><a id="openDonorImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div><img id="detailOriginalImage" class="poster-preview hidden" alt="ภาพต้นฉบับ"><p id="noOriginalImage" class="muted">ไม่มีภาพต้นฉบับ</p></article>
+        <article><div class="card-title"><h3>โปสเตอร์ที่สร้างแล้ว</h3><div><button id="copyGeneratedImageBtn" class="text-button">คัดลอก</button><a id="openGeneratedImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div><img id="detailGeneratedImage" class="poster-preview hidden" alt="โปสเตอร์ที่สร้างแล้ว"><p id="noGeneratedImage" class="muted">ยังไม่ได้อัปโหลดโปสเตอร์</p><label class="drop-zone" id="generatedDropZone">อัปโหลดหรือลากไฟล์โปสเตอร์มาวาง<input id="generatedImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><img id="generatedUploadPreview" class="poster-preview hidden" alt="ตัวอย่างโปสเตอร์"><button id="saveGeneratedImageBtn" class="secondary-button hidden">บันทึกโปสเตอร์นี้</button></article>
+      </div>
+      <article class="content-card"><div class="card-title"><h3>Prompt สำหรับ ChatGPT Image Generation</h3><button id="copyPromptBtn" class="secondary-button">คัดลอก Prompt</button></div><textarea id="detailPrompt" rows="12" readonly></textarea></article>
+      <article class="content-card"><div class="card-title"><h3>แคปชัน Facebook</h3><div><button id="saveCaptionBtn" class="text-button">บันทึกการแก้ไข</button><button id="copyCaptionBtn" class="secondary-button">คัดลอกแคปชัน</button></div></div><textarea id="detailCaption" rows="12"></textarea></article>
+      <div id="facebookResult" class="facebook-result hidden"></div>
+      <button id="publishBtn" class="facebook-button">เผยแพร่ภาพและแคปชันไปยัง Facebook</button>
     </div>
-  </div>
+  </dialog>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script>
-    const donorNameInput = document.getElementById('donorName');
-    const donationDetailInput = document.getElementById('donationDetail');
-    const donationTypeInput = document.getElementById('donationType');
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewContainer = document.getElementById('previewContainer');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitBtnText = document.getElementById('submitBtnText');
-    const resultBox = document.getElementById('resultBox');
-    const outputPrompt = document.getElementById('outputPrompt');
-    const outputCaption = document.getElementById('outputCaption');
-    const appsScriptUrlInput = document.getElementById('appsScriptUrl');
-
-    let base64Image = null;
-    let imageMimeType = 'image/jpeg';
-    let imageName = 'donation-image.jpg';
+    const SCHOOL = {
+      name: 'โรงเรียนบ้านโพนแท่น',
+      event: 'สนับสนุนกีฬาสีภายใน “โพนแท่นเกมส์ ครั้งที่ 31” ประจำปี 2569',
+      bank: 'เลขบัญชี ธนาคารออมสิน 020172956318',
+      account: 'โรงเรียนบ้านโพนแท่น (เงินรายได้สถานศึกษา)',
+      tax: 'การบริจาคเพื่อการศึกษาลดหย่อนภาษีได้ 2 เท่า'
+    };
+    const elements = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map((element) => [element.id, element]));
     let promptTemplate = '';
+    let donorImageFile = null;
+    let generatedImageFile = null;
+    let currentDonation = null;
+    let searchTimer = null;
 
-    // Apps Script web apps do not send CORS headers. JSONP loads the response
-    // as a script tag instead, so it works from the GitHub Pages origin.
-    function requestCaption(appsScriptUrl, payload) {
+    function apiUrl() {
+      const url = elements.appsScriptUrl.value.trim();
+      if (!url) throw new Error('กรุณากรอก URL ของ Google Apps Script');
+      return url;
+    }
+
+    function apiGet(action, parameters = {}) {
       return new Promise((resolve, reject) => {
-        const callbackName = `appsScriptCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const callback = `donationCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
         const script = document.createElement('script');
-        const timeout = window.setTimeout(() => finish(new Error('Google Apps Script ใช้เวลาตอบกลับนานเกินไป')), 30000);
-
-        function finish(error, data) {
-          window.clearTimeout(timeout);
-          delete window[callbackName];
-          script.remove();
-          if (error) reject(error);
-          else resolve(data);
+        const timeout = window.setTimeout(() => finish(new Error('เซิร์ฟเวอร์ใช้เวลาตอบกลับนานเกินไป')), 30000);
+        function finish(error, result) {
+          window.clearTimeout(timeout); delete window[callback]; script.remove();
+          if (error) reject(error); else if (!result.success) reject(new Error(result.error || 'คำขอไม่สำเร็จ')); else resolve(result);
         }
-
-        window[callbackName] = (data) => finish(null, data);
+        window[callback] = (result) => finish(null, result);
         script.onerror = () => finish(new Error('ไม่สามารถเชื่อมต่อ Google Apps Script ได้'));
-        const params = new URLSearchParams({
-          callback: callbackName,
-          donorName: payload.donorName,
-          donationDetail: payload.donationDetail,
-          hasPortrait: String(payload.hasPortrait),
-          imageUrl: payload.imageUrl || ''
-        });
-        script.src = `${appsScriptUrl}${appsScriptUrl.includes('?') ? '&' : '?'}${params}`;
+        const query = new URLSearchParams({ action, callback, ...parameters });
+        script.src = `${apiUrl()}${apiUrl().includes('?') ? '&' : '?'}${query}`;
         document.head.appendChild(script);
       });
     }
 
-    function uploadImage(appsScriptUrl) {
+    function apiPost(action, payload = {}) {
       return new Promise((resolve, reject) => {
-        const nonce = `upload_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const nonce = `request_${Date.now()}_${Math.random().toString(36).slice(2)}`;
         const iframe = document.createElement('iframe');
         const form = document.createElement('form');
-        const timeout = window.setTimeout(() => finish(new Error('อัปโหลดรูปไปยัง Google Drive ใช้เวลานานเกินไป')), 60000);
-
-        function finish(error, data) {
-          window.clearTimeout(timeout);
-          window.removeEventListener('message', onMessage);
-          form.remove();
-          iframe.remove();
-          if (error) reject(error);
-          else resolve(data);
+        const timeout = window.setTimeout(() => finish(new Error('เซิร์ฟเวอร์ใช้เวลาตอบกลับนานเกินไป')), 90000);
+        function finish(error, result) {
+          window.clearTimeout(timeout); window.removeEventListener('message', onMessage); form.remove(); iframe.remove();
+          if (error) reject(error); else if (!result.success) reject(new Error(result.error || 'คำขอไม่สำเร็จ')); else resolve(result);
         }
-
         function onMessage(event) {
           const message = event.data;
-          if (!message || message.type !== 'donation-image-upload' || message.nonce !== nonce) return;
-          if (!message.result || !message.result.success) {
-            finish(new Error(message.result && message.result.error || 'ไม่สามารถบันทึกรูปใน Google Drive ได้'));
-            return;
-          }
+          if (!message || message.type !== 'donation-api-response' || message.nonce !== nonce) return;
           finish(null, message.result);
         }
-
         function addField(name, value) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
+          const input = document.createElement('input'); input.type = 'hidden'; input.name = name; input.value = value == null ? '' : String(value); form.appendChild(input);
         }
-
-        iframe.name = nonce;
-        iframe.hidden = true;
-        form.method = 'post';
-        form.action = appsScriptUrl;
-        form.target = nonce;
-        form.hidden = true;
-        addField('action', 'uploadImage');
-        addField('nonce', nonce);
-        addField('origin', window.location.origin);
-        addField('imageBase64', base64Image);
-        addField('imageMimeType', imageMimeType);
-        addField('imageName', imageName);
-        window.addEventListener('message', onMessage);
-        document.body.append(iframe, form);
-        form.submit();
+        iframe.name = nonce; iframe.hidden = true; form.method = 'post'; form.action = apiUrl(); form.target = nonce; form.hidden = true;
+        addField('action', action); addField('nonce', nonce); addField('origin', window.location.origin);
+        addField('accessKey', elements.adminAccessKey.value);
+        Object.entries(payload).forEach(([name, value]) => addField(name, value));
+        window.addEventListener('message', onMessage); document.body.append(iframe, form); form.submit();
       });
     }
 
-    appsScriptUrlInput.value = localStorage.getItem('appsScriptUrl') || '';
-    appsScriptUrlInput.addEventListener('change', () => {
-      localStorage.setItem('appsScriptUrl', appsScriptUrlInput.value.trim());
+    function buildPrompt(donation) {
+      const portraitInstruction = donation.donorImageId
+        ? 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.'
+        : 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
+      return promptTemplate.replaceAll('[DONOR_NAME]', donation.donorName)
+        .replaceAll('[DONATION_TYPE]', donation.donationType)
+        .replaceAll('[DONATION_DETAIL]', donation.donationDetail)
+        .replaceAll('[PORTRAIT_INSTRUCTION]', portraitInstruction);
+    }
+
+    function buildCaption(donation) {
+      return `💜 ${SCHOOL.name} ขอขอบพระคุณ 💜\n\n${donation.donorName}\n\nที่ได้${SCHOOL.event} ด้วย ${donation.donationDetail}\n\n🏦 ${SCHOOL.bank}\nชื่อบัญชี ${SCHOOL.account}\n\n📌 ${SCHOOL.tax}\n\nทุกการสนับสนุนคือกำลังใจสำคัญที่ช่วยให้นักเรียนได้แข่งขันอย่างเต็มความสามารถ และร่วมสร้างความทรงจำที่ดีไปด้วยกัน\n\nขออำนวยพรให้ท่านและครอบครัวประสบแต่ความสุข ความเจริญ สุขภาพแข็งแรง และมีความสุขมั่นคงตลอดไป\n\n#กีฬาสีภายใน #โพนแท่นเกมส์ #การบริจาคเพื่อสถานศึกษาสามารถลดหย่อนภาษีได้2เท่า #ผู้ให้การสนับสนุน #ผู้ใหญ่ใจดี`;
+    }
+
+    async function filePayload(file) {
+      const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+      return { imageBase64: dataUrl.split(',')[1], imageMimeType: file.type, imageName: file.name };
+    }
+
+    function newId() { return crypto.randomUUID ? crypto.randomUUID() : `donation-${Date.now()}-${Math.random().toString(36).slice(2)}`; }
+    function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value == null ? '' : String(value); return node.innerHTML; }
+    function formatDate(value) { if (!value) return '-'; const date = new Date(value); return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' }).format(date); }
+    function typeLabel(type) { return type === 'in-kind' ? 'สิ่งของ' : 'เงิน'; }
+    function statusLabel(status) { return { draft: 'รอโปสเตอร์', ready: 'พร้อมเผยแพร่', publishing: 'กำลังเผยแพร่', published: 'เผยแพร่แล้ว', publish_failed: 'เผยแพร่ไม่สำเร็จ' }[status] || status || 'รอดำเนินการ'; }
+    function showToast(message, isError = false) { elements.toast.textContent = message; elements.toast.className = `toast ${isError ? 'error' : ''}`; window.setTimeout(() => elements.toast.classList.add('hidden'), 3500); }
+    function setBusy(button, busy, text) { if (!button.dataset.label) button.dataset.label = button.textContent; button.disabled = busy; button.textContent = busy ? text : button.dataset.label; }
+
+    async function copyText(text, successMessage) {
+      try { await navigator.clipboard.writeText(text); showToast(successMessage); }
+      catch (error) { showToast('เบราว์เซอร์ไม่อนุญาตให้คัดลอก กรุณาคัดลอกด้วยตนเอง', true); }
+    }
+
+    async function copyImage(url) {
+      if (!url) return showToast('ไม่มีภาพให้คัดลอก', true);
+      try { const blob = await fetch(url).then((response) => response.blob()); await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]); showToast('คัดลอกรูปภาพแล้ว'); }
+      catch (error) { window.open(url, '_blank', 'noopener'); showToast('อุปกรณ์นี้คัดลอกรูปไม่ได้ จึงเปิดภาพให้ดาวน์โหลดแทน', true); }
+    }
+
+    document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
+      elements.createView.classList.toggle('hidden', tab.dataset.view !== 'create');
+      elements.historyView.classList.toggle('hidden', tab.dataset.view !== 'history');
+      if (tab.dataset.view === 'history') loadDonations();
+    }));
+
+    elements.appsScriptUrl.value = localStorage.getItem('appsScriptUrl') || '';
+    elements.appsScriptUrl.addEventListener('change', () => localStorage.setItem('appsScriptUrl', elements.appsScriptUrl.value.trim()));
+    elements.adminAccessKey.value = sessionStorage.getItem('adminAccessKey') || '';
+    elements.adminAccessKey.addEventListener('change', () => sessionStorage.setItem('adminAccessKey', elements.adminAccessKey.value));
+    fetch('prompt_template.txt', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.text(); }).then((text) => { promptTemplate = text.trim(); }).catch(() => showToast('โหลด Prompt Template ไม่สำเร็จ', true));
+
+    elements.donorImageInput.addEventListener('change', () => {
+      donorImageFile = elements.donorImageInput.files[0] || null;
+      if (donorImageFile) { elements.donorPreview.src = URL.createObjectURL(donorImageFile); elements.donorPreview.classList.remove('hidden'); }
     });
 
-    // Keep the approved image-generation prompt in prompt_template.txt rather
-    // than asking the model to rewrite or shorten it.
-    fetch('prompt_template.txt', { cache: 'no-store' })
-      .then((response) => {
-        if (!response.ok) throw new Error('Unable to load prompt template');
-        return response.text();
-      })
-      .then((template) => { promptTemplate = template.trim(); })
-      .catch((error) => console.error('Prompt template error:', error));
-
-    // ดักจับรูปภาพจากกล้อง/การอัปโหลด
-    imageInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        imageMimeType = file.type;
-        imageName = file.name || 'donation-image.jpg';
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          imagePreview.src = event.target.result;
-          previewContainer.classList.remove('hidden');
-          base64Image = event.target.result.split(',')[1];
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // เรียกใช้งาน OpenRouter API
-    submitBtn.addEventListener('click', async () => {
-      const appsScriptUrl = appsScriptUrlInput.value.trim();
-      if (!appsScriptUrl) { alert('กรุณากรอก URL ของ Google Apps Script ในส่วนตั้งค่าด้านบน'); return; }
-
-      const donorName = donorNameInput.value.trim() || '[ชื่อผู้บริจาค/หน่วยงาน]';
-      const donationDetail = donationDetailInput.value.trim() || '[รายการสนับสนุน]';
-      const donationType = donationTypeInput.value;
-
-      if (!promptTemplate) {
-        alert('ไม่สามารถโหลด prompt_template.txt ได้ กรุณารีเฟรชหน้าเว็บแล้วลองใหม่อีกครั้ง');
-        return;
-      }
-
-      // The image prompt must always be the approved template. Replace only
-      // the single-source variable fields with the submitted values.
-      outputPrompt.value = promptTemplate
-        .replaceAll('[DONOR_NAME]', donorName)
-        .replaceAll('[DONATION_TYPE]', donationType)
-        .replaceAll('[DONATION_DETAIL]', donationDetail);
-      outputCaption.innerText = '';
-      resultBox.classList.remove('hidden');
-
-      submitBtn.disabled = true;
-      submitBtnText.innerText = base64Image ? 'กำลังบันทึกรูปใน Google Drive...' : 'กำลังบันทึกข้อมูลและร่างแคปชัน...';
-
+    elements.donationForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!promptTemplate) return showToast('Prompt Template ยังโหลดไม่สำเร็จ', true);
+      const donorName = elements.donorName.value;
+      const donationDetail = elements.donationDetail.value;
+      if (!donorName.trim() || !donationDetail.trim()) return showToast('กรุณากรอกชื่อและรายละเอียดการบริจาค', true);
+      const id = newId(); const requestId = newId();
+      const donation = { id, requestId, donorName, donationType: elements.donationType.value, donationDetail, notes: elements.notes.value, donorImageId: '', donorImageUrl: '' };
+      setBusy(elements.submitBtn, true, donorImageFile ? 'กำลังอัปโหลดภาพผู้บริจาค...' : 'กำลังบันทึกข้อมูล...');
       try {
-        let imageUrl = '';
-        if (base64Image) {
-          const upload = await uploadImage(appsScriptUrl);
-          imageUrl = upload.imageUrl;
-          submitBtnText.innerText = 'กำลังบันทึกข้อมูลและร่างแคปชัน...';
+        if (donorImageFile) {
+          const upload = await apiPost('uploadImage', { donationId: id, imageKind: 'donor', createPending: true, ...await filePayload(donorImageFile) });
+          donation.donorImageId = upload.imageId; donation.donorImageUrl = upload.imageUrl;
         }
-        const data = await requestCaption(appsScriptUrl, {
-          donorName,
-          donationDetail,
-          hasPortrait: Boolean(base64Image),
-          imageUrl
-        });
-        if (!data.success) throw new Error(data.error || 'Google Apps Script request failed');
-        outputCaption.innerText = data.facebook_caption;
-        resultBox.classList.remove('hidden');
-
-      } catch (err) {
-        console.error(err);
-        alert(`เกิดข้อผิดพลาด: ${err.message || 'ไม่สามารถประมวลผลข้อมูลได้ กรุณาตรวจสอบ Google Apps Script หรืออินเทอร์เน็ต'}`);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtnText.innerText = 'สร้าง Prompt และแคปชัน';
-      }
+        donation.generatedPrompt = buildPrompt(donation); donation.caption = buildCaption(donation);
+        const result = await apiPost('createDonation', donation);
+        elements.donationForm.reset(); donorImageFile = null; elements.donorPreview.classList.add('hidden');
+        showToast(result.duplicate ? 'รายการนี้ถูกบันทึกไว้แล้ว' : 'บันทึกรายการเรียบร้อยแล้ว');
+        openDonation(result.donation.id);
+      } catch (error) { showToast(error.message, true); }
+      finally { setBusy(elements.submitBtn, false, ''); }
     });
 
-    // ปุ่มคัดลอก
-    document.getElementById('copyPromptBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(outputPrompt.value);
-      alert('คัดลอก Prompt สำหรับ DALL-E 3 แล้ว!');
+    async function loadDonations() {
+      elements.historyLoading.classList.remove('hidden'); elements.historyEmpty.classList.add('hidden'); elements.donationList.innerHTML = '';
+      try {
+        const result = await apiPost('listDonations', { search: elements.searchInput.value, donationType: elements.typeFilter.value, publishingStatus: elements.statusFilter.value });
+        elements.donationList.innerHTML = result.donations.map((donation) => `<button class="donation-row" data-id="${escapeHtml(donation.id)}"><div class="thumbnail">${donation.donorImageUrl ? `<img src="${escapeHtml(donation.donorImageUrl)}" alt="">` : '<span>🤝</span>'}</div><div class="record-main"><strong>${escapeHtml(donation.donorName)}</strong><p>${escapeHtml(donation.donationDetail)}</p><small>${formatDate(donation.createdAt)}</small></div><span class="type-pill">${typeLabel(donation.donationType)}</span><span class="image-status">${donation.generatedImageId ? 'มีโปสเตอร์' : 'ยังไม่มีโปสเตอร์'}</span><span class="status-badge status-${escapeHtml(donation.publishingStatus)}">${statusLabel(donation.publishingStatus)}</span></button>`).join('');
+        elements.historyEmpty.classList.toggle('hidden', result.donations.length > 0);
+        document.querySelectorAll('.donation-row').forEach((row) => row.addEventListener('click', () => openDonation(row.dataset.id)));
+      } catch (error) { showToast(error.message, true); elements.historyEmpty.textContent = 'โหลดข้อมูลไม่สำเร็จ'; elements.historyEmpty.classList.remove('hidden'); }
+      finally { elements.historyLoading.classList.add('hidden'); }
+    }
+
+    async function openDonation(id) {
+      try { const result = await apiPost('getDonation', { id }); currentDonation = result.donation; renderDetail(); elements.detailDialog.showModal(); }
+      catch (error) { showToast(error.message, true); }
+    }
+
+    function renderDetail() {
+      const donation = currentDonation; if (!donation) return;
+      elements.detailDonorName.textContent = donation.donorName; elements.detailDonationType.textContent = `ประเภท: ${typeLabel(donation.donationType)}`; elements.detailDonationDetail.textContent = donation.donationDetail; elements.detailCreatedAt.textContent = `บันทึกเมื่อ ${formatDate(donation.createdAt)}`; elements.detailStatus.textContent = statusLabel(donation.publishingStatus); elements.detailStatus.className = `status-badge status-${donation.publishingStatus}`;
+      showImage(elements.detailDonorImage, donation.donorImageUrl); showImage(elements.detailOriginalImage, donation.donorImageUrl, elements.noOriginalImage); showImage(elements.detailGeneratedImage, donation.generatedImageUrl, elements.noGeneratedImage);
+      elements.openDonorImageBtn.href = donation.donorImageUrl || '#'; elements.openGeneratedImageBtn.href = donation.generatedImageUrl || '#'; elements.detailPrompt.value = donation.generatedPrompt; elements.detailCaption.value = donation.caption; elements.generatedUploadPreview.classList.add('hidden'); elements.saveGeneratedImageBtn.classList.add('hidden'); generatedImageFile = null;
+      elements.facebookResult.classList.toggle('hidden', !donation.facebookPostId);
+      elements.facebookResult.innerHTML = donation.facebookPostId ? `เผยแพร่แล้วเมื่อ ${formatDate(donation.facebookPublishedAt)} · <a href="${escapeHtml(donation.facebookPostUrl)}" target="_blank" rel="noopener">เปิดโพสต์ Facebook</a>` : '';
+      const canPublish = donation.generatedImageId && donation.caption && !donation.facebookPostId && donation.publishingStatus !== 'publishing'; elements.publishBtn.disabled = !canPublish; elements.publishBtn.textContent = donation.facebookPostId ? 'เผยแพร่ไปยัง Facebook แล้ว' : donation.generatedImageId ? 'เผยแพร่ภาพและแคปชันไปยัง Facebook' : 'อัปโหลดโปสเตอร์ก่อนเผยแพร่';
+    }
+
+    function showImage(image, url, emptyMessage) { image.classList.toggle('hidden', !url); if (url) image.src = url; if (emptyMessage) emptyMessage.classList.toggle('hidden', Boolean(url)); }
+    elements.closeDialogBtn.addEventListener('click', () => elements.detailDialog.close());
+    elements.detailDialog.addEventListener('click', (event) => { if (event.target === elements.detailDialog) elements.detailDialog.close(); });
+    elements.copyPromptBtn.addEventListener('click', () => copyText(elements.detailPrompt.value, 'คัดลอก Prompt แล้ว'));
+    elements.copyCaptionBtn.addEventListener('click', () => copyText(elements.detailCaption.value, 'คัดลอกแคปชันแล้ว'));
+    elements.copyDonorImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.donorImageUrl));
+    elements.copyGeneratedImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.generatedImageUrl));
+
+    elements.saveCaptionBtn.addEventListener('click', async () => {
+      if (!currentDonation) return; setBusy(elements.saveCaptionBtn, true, 'กำลังบันทึก...');
+      try { const result = await apiPost('updateDonation', { id: currentDonation.id, caption: elements.detailCaption.value }); currentDonation = result.donation; renderDetail(); showToast('บันทึกแคปชันแล้ว'); }
+      catch (error) { showToast(error.message, true); } finally { setBusy(elements.saveCaptionBtn, false, ''); }
     });
 
-    document.getElementById('copyCaptionBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(outputCaption.innerText);
-      alert('คัดลอกแคปชัน Facebook แล้ว!');
+    function selectGeneratedFile(file) { if (!file || !file.type.startsWith('image/')) return showToast('กรุณาเลือกไฟล์รูปภาพ', true); generatedImageFile = file; elements.generatedUploadPreview.src = URL.createObjectURL(file); elements.generatedUploadPreview.classList.remove('hidden'); elements.saveGeneratedImageBtn.classList.remove('hidden'); }
+    elements.generatedImageInput.addEventListener('change', () => selectGeneratedFile(elements.generatedImageInput.files[0]));
+    ['dragenter', 'dragover'].forEach((name) => elements.generatedDropZone.addEventListener(name, (event) => { event.preventDefault(); elements.generatedDropZone.classList.add('dragging'); }));
+    ['dragleave', 'drop'].forEach((name) => elements.generatedDropZone.addEventListener(name, (event) => { event.preventDefault(); elements.generatedDropZone.classList.remove('dragging'); if (name === 'drop') selectGeneratedFile(event.dataTransfer.files[0]); }));
+    elements.saveGeneratedImageBtn.addEventListener('click', async () => {
+      if (!generatedImageFile || !currentDonation) return; setBusy(elements.saveGeneratedImageBtn, true, 'กำลังอัปโหลด...');
+      try { const result = await apiPost('uploadImage', { donationId: currentDonation.id, imageKind: 'generated', ...await filePayload(generatedImageFile) }); currentDonation = result.donation; renderDetail(); showToast('บันทึกโปสเตอร์กับรายการเดิมแล้ว'); }
+      catch (error) { showToast(error.message, true); } finally { setBusy(elements.saveGeneratedImageBtn, false, ''); }
     });
+
+    elements.publishBtn.addEventListener('click', async () => {
+      if (!currentDonation || !window.confirm(`ยืนยันเผยแพร่โปสเตอร์ของ “${currentDonation.donorName}” ไปยังเพจ Facebook หรือไม่?\n\nการดำเนินการนี้จะสร้างโพสต์จริง`)) return;
+      setBusy(elements.publishBtn, true, 'กำลังเผยแพร่ไปยัง Facebook...');
+      try { const result = await apiPost('publishFacebook', { id: currentDonation.id }); currentDonation = result.donation; renderDetail(); showToast(result.duplicate ? 'รายการนี้เผยแพร่ไปแล้ว' : 'เผยแพร่ Facebook สำเร็จ'); }
+      catch (error) { showToast(error.message, true); try { currentDonation = (await apiPost('getDonation', { id: currentDonation.id })).donation; renderDetail(); } catch (_) {} }
+      finally { setBusy(elements.publishBtn, false, ''); }
+    });
+
+    elements.refreshBtn.addEventListener('click', loadDonations);
+    [elements.typeFilter, elements.statusFilter].forEach((input) => input.addEventListener('change', loadDonations));
+    elements.searchInput.addEventListener('input', () => { window.clearTimeout(searchTimer); searchTimer = window.setTimeout(loadDonations, 350); });
   </script>
 </body>
 </html>

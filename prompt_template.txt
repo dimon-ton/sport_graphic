@@ -4,7 +4,7 @@ IMPORTANT:
 
 Use the provided reference poster only as the DESIGN AND LAYOUT REFERENCE.
 
-Use the newly uploaded portrait photo as the PERSON / IDENTITY REFERENCE.
+[PORTRAIT_INSTRUCTION]
 
 The overall composition, visual hierarchy, proportions, typography placement, decorative elements, and premium celebratory atmosphere should closely follow the reference poster.
 
@@ -16,7 +16,7 @@ VARIABLE DATA:
 
 - Donation detail: [DONATION_DETAIL]
 
-- Donor portrait: use the uploaded donor image
+- Donor portrait: follow the portrait reference instruction above
 
 STRICT DATA RULE:
 
