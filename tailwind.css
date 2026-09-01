@@ -27,9 +27,9 @@
   .app-header h1 { @apply mt-1 text-2xl font-bold md:text-3xl; }
   .app-header p:not(.eyebrow) { @apply mt-2 max-w-2xl text-sm text-violet-100; }
   .eyebrow { @apply text-xs font-bold uppercase tracking-widest text-amber-300; }
-  .tabs { @apply flex shrink-0 rounded-xl bg-white/10 p-1; }
-  .tab { @apply rounded-lg px-4 py-2 text-sm font-semibold text-violet-100 transition hover:bg-white/10; }
-  .tab.active { @apply bg-white text-purple-900 shadow; }
+  .tabs { @apply flex shrink-0 rounded-xl bg-violet-950/40 p-1 ring-1 ring-white/20; }
+  .tab { @apply rounded-lg px-4 py-2 text-sm font-medium text-violet-200 transition hover:bg-white/10 hover:text-white; }
+  .tab.active { @apply bg-white font-bold text-purple-900 shadow-md; }
   .settings-card, .view-panel { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6; }
   .settings-card summary { @apply cursor-pointer font-semibold text-slate-700; }
   .settings-card label { @apply mt-4; }
@@ -40,17 +40,20 @@
   .section-heading h2 { @apply text-xl font-bold text-slate-800; }
   .section-heading p { @apply text-xs text-slate-500; }
   .history-heading { @apply flex-row items-center; }
+  #donationForm { @apply mx-auto max-w-4xl; }
   .form-grid { @apply grid grid-cols-1 gap-4 md:grid-cols-2; }
   .form-grid label { @apply space-y-1; }
   .form-grid .wide { @apply md:col-span-2; }
-  .upload-card { @apply mt-5 rounded-2xl border border-dashed border-violet-300 bg-violet-50 p-4; }
+  .field-hint { @apply text-slate-500; }
+  .upload-card { @apply mt-4; }
   .upload-card p { @apply mt-1 text-xs text-slate-500; }
-  .upload-copy { @apply mb-4; }
-  .donor-empty-state { @apply rounded-xl border border-violet-200 bg-white p-4 text-center; }
-  .donor-empty-state small { @apply mt-2 block text-xs text-slate-400; }
-  .image-add-button { @apply w-full rounded-xl bg-violet-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-800; }
-  .donor-selected-state { @apply grid grid-cols-[88px_1fr] items-center gap-4 rounded-xl border border-violet-200 bg-white p-3; }
-  .donor-selected-state .image-preview { @apply h-24 w-24 max-w-full rounded-xl border border-slate-200 object-cover; }
+  .upload-copy { @apply mb-2; }
+  .upload-copy strong { @apply text-sm font-medium text-slate-600; }
+  .donor-empty-state { @apply flex flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-violet-300 bg-violet-50 p-4; }
+  .donor-empty-state small { @apply block text-xs text-slate-400; }
+  .image-add-button { @apply rounded-lg bg-white px-3 py-2 text-sm font-semibold text-violet-700 shadow-sm ring-1 ring-violet-200 transition hover:bg-violet-100; }
+  .donor-selected-state { @apply grid grid-cols-[72px_1fr] items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 p-2.5; }
+  .donor-selected-state .image-preview { @apply h-[72px] w-[72px] max-w-full rounded-lg border border-slate-200 object-cover; }
   .donor-selected-state strong, .donor-selected-state small { @apply block break-all; }
   .donor-selected-state small { @apply mb-3 mt-1 text-xs font-normal text-slate-500; }
   .image-source-dialog { @apply m-0 h-full max-h-none w-full max-w-none border-0 bg-transparent p-0 backdrop:bg-slate-950/60 md:m-auto md:h-auto md:w-[420px]; }

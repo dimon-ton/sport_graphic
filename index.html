@@ -14,9 +14,9 @@
         <h1>ระบบจัดการสื่อขอบคุณผู้บริจาค</h1>
         <p>บันทึกข้อมูล สร้าง Prompt จัดเก็บโปสเตอร์ และเผยแพร่ Facebook ในที่เดียว</p>
       </div>
-      <nav class="tabs" aria-label="หน้าหลัก">
-        <button class="tab active" data-view="create">เพิ่มรายการ</button>
-        <button class="tab" data-view="history">ประวัติการบริจาค</button>
+      <nav class="tabs" aria-label="หน้าหลัก" role="tablist">
+        <button class="tab active" data-view="create" role="tab" aria-selected="true">เพิ่มรายการ</button>
+        <button class="tab" data-view="history" role="tab" aria-selected="false">ประวัติการบริจาค</button>
       </nav>
     </header>
 
@@ -33,7 +33,6 @@
       <form id="donationForm">
         <div class="section-heading">
           <div><span>01</span><h2>ข้อมูลผู้บริจาค</h2></div>
-          <p>ระบบจะเก็บข้อความตามที่กรอกทุกตัวอักษร โดยไม่เติมหน่วยอัตโนมัติ</p>
         </div>
         <div class="form-grid">
           <label>ชื่อผู้บริจาค / หน่วยงาน
@@ -47,7 +46,7 @@
           </label>
           <label class="wide">รายละเอียดการบริจาค
             <input type="text" id="donationDetail" required placeholder="เช่น 2,000 บาท หรือ น้ำดื่ม 10 แพ็ค">
-            <small>กรอกหน่วยที่ต้องการให้แสดงด้วย ระบบจะไม่เติม “บาท” หรือหน่วยอื่น</small>
+            <small class="field-hint">ⓘ ระบบจะเก็บข้อความตามที่กรอกทุกตัวอักษร โดยไม่เติม “บาท” หรือหน่วยอื่นอัตโนมัติ กรุณากรอกหน่วยที่ต้องการให้แสดงด้วย</small>
           </label>
           <label class="wide">หมายเหตุ (ไม่บังคับ)
             <textarea id="notes" rows="2" placeholder="ข้อมูลภายในเพิ่มเติม"></textarea>
@@ -224,7 +223,10 @@
     }
 
     document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
+      document.querySelectorAll('.tab').forEach((item) => {
+        item.classList.toggle('active', item === tab);
+        item.setAttribute('aria-selected', String(item === tab));
+      });
       elements.createView.classList.toggle('hidden', tab.dataset.view !== 'create');
       elements.historyView.classList.toggle('hidden', tab.dataset.view !== 'history');
       if (tab.dataset.view === 'history') loadDonations();
