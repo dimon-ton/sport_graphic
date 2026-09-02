@@ -137,7 +137,36 @@
       <div class="record-summary">
         <img id="detailDonorImage" class="record-image hidden" alt="ภาพผู้บริจาค">
         <div><p id="detailDonationType"></p><strong id="detailDonationDetail"></strong><small id="detailCreatedAt"></small><span id="detailStatus" class="status-badge"></span></div>
+        <button id="openEditDonationBtn" class="record-edit-button" type="button">✎ แก้ไขข้อมูล</button>
       </div>
+      <article id="editDonationPanel" class="content-card edit-donation-panel hidden">
+        <div class="card-title"><h3>แก้ไขข้อมูลผู้บริจาค</h3></div>
+        <form id="editDonationForm">
+          <div class="form-grid">
+            <label>ชื่อผู้บริจาค / หน่วยงาน
+              <input type="text" id="editDonorName" required>
+            </label>
+            <label>ประเภทการบริจาค
+              <select id="editDonationType" required>
+                <option value="money">เงิน</option>
+                <option value="in-kind">สิ่งของ</option>
+              </select>
+            </label>
+            <label class="wide">รายละเอียดการบริจาค
+              <input type="text" id="editDonationDetail" required>
+              <small>กรอกหน่วยที่ต้องการให้แสดง เช่น “2,000 บาท” หรือ “น้ำดื่ม 10 แพ็ค”</small>
+            </label>
+            <label class="wide">หมายเหตุ (ไม่บังคับ)
+              <textarea id="editDonationNotes" rows="2"></textarea>
+            </label>
+          </div>
+          <p id="editDonationNote" class="edit-donation-note"></p>
+          <div class="edit-donation-actions">
+            <button id="cancelEditDonationBtn" class="secondary-button" type="button">ยกเลิก</button>
+            <button id="saveDonationDataBtn" class="primary-button" type="submit">บันทึกการแก้ไข</button>
+          </div>
+        </form>
+      </article>
       <div class="media-grid">
         <article>
           <div class="card-title"><h3>ภาพผู้บริจาค</h3><div><button id="copyDonorImageBtn" class="text-button">คัดลอก</button><a id="openDonorImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div>
@@ -341,7 +370,9 @@
       'donorCameraInput', 'donorFileInput', 'submitBtn', 'refreshBtn', 'searchInput',
       'openDeleteDialogBtn', 'confirmDeleteBtn', 'detailDonorImageInput',
       'saveDetailDonorImageBtn', 'saveCaptionBtn', 'generatedImageInput',
-      'saveGeneratedImageBtn', 'publishBtn'
+      'saveGeneratedImageBtn', 'publishBtn', 'openEditDonationBtn',
+      'editDonorName', 'editDonationType', 'editDonationDetail',
+      'editDonationNotes', 'saveDonationDataBtn'
     ];
     onlineActionIds.forEach((id) => elements[id].setAttribute('data-online-action', ''));
     const historyTab = document.querySelector('.tab[data-view="history"]');
@@ -508,6 +539,7 @@
       elements.detailDonorName.textContent = donation.donorName; elements.detailDonationType.textContent = `ประเภท: ${typeLabel(donation.donationType)}`; elements.detailDonationDetail.textContent = donation.donationDetail; elements.detailCreatedAt.textContent = `บันทึกเมื่อ ${formatDate(donation.createdAt)}`; elements.detailStatus.textContent = statusLabel(donation.publishingStatus); elements.detailStatus.className = `status-badge status-${donation.publishingStatus}`;
       showImage(elements.detailDonorImage, donation.donorImageUrl); showImage(elements.detailOriginalImage, donation.donorImageUrl, elements.noOriginalImage); showImage(elements.detailGeneratedImage, donation.generatedImageUrl, elements.noGeneratedImage);
       elements.openDonorImageBtn.href = donation.donorImageUrl || '#'; elements.openGeneratedImageBtn.href = donation.generatedImageUrl || '#'; elements.detailPrompt.value = donation.generatedPrompt; elements.detailCaption.value = donation.caption;
+      elements.editDonationPanel.classList.add('hidden');
       elements.detailDonorUploadPreview.classList.add('hidden'); elements.saveDetailDonorImageBtn.classList.add('hidden'); elements.detailDonorImageInput.value = ''; detailDonorImageFile = null;
       elements.generatedUploadPreview.classList.add('hidden'); elements.saveGeneratedImageBtn.classList.add('hidden'); generatedImageFile = null;
       elements.facebookResult.classList.toggle('hidden', !donation.facebookPostId);
@@ -516,6 +548,50 @@
     }
 
     function showImage(image, url, emptyMessage) { image.classList.toggle('hidden', !url); if (url) image.src = url; if (emptyMessage) emptyMessage.classList.toggle('hidden', Boolean(url)); }
+    elements.openEditDonationBtn.addEventListener('click', () => {
+      if (!currentDonation) return;
+      elements.editDonorName.value = currentDonation.donorName;
+      elements.editDonationType.value = currentDonation.donationType;
+      elements.editDonationDetail.value = currentDonation.donationDetail;
+      elements.editDonationNotes.value = currentDonation.notes || '';
+      if (currentDonation.facebookPostId || currentDonation.publishingStatus === 'published') {
+        elements.editDonationNote.textContent = 'ข้อมูลในระบบจะถูกแก้ไข แต่โปสเตอร์และโพสต์ Facebook ที่เผยแพร่ไปแล้วจะไม่เปลี่ยนแปลงอัตโนมัติ';
+      } else if (currentDonation.generatedImageId) {
+        elements.editDonationNote.textContent = 'หากแก้ชื่อ ประเภท หรือรายละเอียด ระบบจะสร้าง Prompt และแคปชันใหม่ พร้อมยกเลิกการเชื่อมโยงโปสเตอร์เดิมเพื่อป้องกันการเผยแพร่ข้อมูลเก่า (ไฟล์ใน Google Drive จะยังอยู่)';
+      } else {
+        elements.editDonationNote.textContent = 'หากแก้ชื่อ ประเภท หรือรายละเอียด ระบบจะอัปเดต Prompt และแคปชันให้โดยอัตโนมัติ';
+      }
+      elements.editDonationPanel.classList.remove('hidden');
+      elements.editDonorName.focus();
+    });
+    elements.cancelEditDonationBtn.addEventListener('click', () => elements.editDonationPanel.classList.add('hidden'));
+    elements.editDonationForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!currentDonation) return;
+      const donorName = elements.editDonorName.value;
+      const donationType = elements.editDonationType.value;
+      const donationDetail = elements.editDonationDetail.value;
+      const notes = elements.editDonationNotes.value;
+      if (!donorName.trim() || !donationDetail.trim()) return showToast('กรุณากรอกชื่อและรายละเอียดการบริจาค', true);
+      const contentChanged = donorName !== currentDonation.donorName || donationType !== currentDonation.donationType || donationDetail !== currentDonation.donationDetail;
+      if (contentChanged && !promptTemplate) return showToast('Prompt Template ยังโหลดไม่สำเร็จ', true);
+      const payload = { id: currentDonation.id, donorName, donationType, donationDetail, notes };
+      if (contentChanged) {
+        const updatedDonation = { ...currentDonation, donorName, donationType, donationDetail };
+        payload.generatedPrompt = buildPrompt(updatedDonation);
+        payload.caption = buildCaption(updatedDonation);
+      }
+      const invalidatesPoster = contentChanged && currentDonation.generatedImageId && !currentDonation.facebookPostId && currentDonation.publishingStatus !== 'published';
+      setBusy(elements.saveDonationDataBtn, true, 'กำลังบันทึก...');
+      try {
+        const result = await apiPost('updateDonation', payload);
+        currentDonation = result.donation;
+        renderDetail();
+        showToast(invalidatesPoster ? 'บันทึกข้อมูลแล้ว กรุณาสร้างและอัปโหลดโปสเตอร์ใหม่' : 'บันทึกข้อมูลผู้บริจาคแล้ว');
+        if (!elements.historyView.classList.contains('hidden')) await loadDonations();
+      } catch (error) { showToast(error.message, true); }
+      finally { setBusy(elements.saveDonationDataBtn, false, ''); }
+    });
     elements.closeDialogBtn.addEventListener('click', () => elements.detailDialog.close());
     elements.detailDialog.addEventListener('click', (event) => { if (event.target === elements.detailDialog) elements.detailDialog.close(); });
     elements.openDeleteDialogBtn.addEventListener('click', () => {

@@ -88,6 +88,15 @@ function createDonation_(payload) {
 function updateDonation_(payload) {
   const id = requiredString_(payload.id, 'id');
   return mutateDonation_(id, function (donation) {
+    const contentChanged = ['donorName', 'donationDetail', 'donationType'].some(function (field) {
+      return Object.prototype.hasOwnProperty.call(payload, field) && String(payload[field] == null ? '' : payload[field]) !== String(donation[field] || '');
+    });
+    if (contentChanged && donation.publishingStatus === 'publishing') {
+      throw new Error('Donation data cannot be edited while Facebook publishing is in progress.');
+    }
+    if (contentChanged && (!Object.prototype.hasOwnProperty.call(payload, 'generatedPrompt') || !Object.prototype.hasOwnProperty.call(payload, 'caption') || !String(payload.generatedPrompt || '').trim() || !String(payload.caption || '').trim())) {
+      throw new Error('Updated prompt and caption are required when donation data changes.');
+    }
     ['donorName', 'donationDetail', 'generatedPrompt', 'caption', 'notes'].forEach(function (field) {
       if (Object.prototype.hasOwnProperty.call(payload, field)) {
         const value = String(payload[field] == null ? '' : payload[field]);
@@ -102,8 +111,12 @@ function updateDonation_(payload) {
       if (donationType !== 'money' && donationType !== 'in-kind') throw new Error('Invalid donation type.');
       donation.donationType = donationType;
     }
-    if (donation.generatedImageId && donation.caption && donation.publishingStatus !== 'published') {
-      donation.publishingStatus = 'ready';
+    if (contentChanged && donation.publishingStatus !== 'published') {
+      donation.generatedImageId = '';
+      donation.generatedImageUrl = '';
+      donation.publishingStatus = 'draft';
+    } else if (donation.publishingStatus !== 'published' && donation.publishingStatus !== 'publishing') {
+      donation.publishingStatus = donation.generatedImageId && String(donation.caption || '').trim() ? 'ready' : 'draft';
     }
     return donation;
   });

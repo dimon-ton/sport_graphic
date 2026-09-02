@@ -93,5 +93,6 @@ python3 -m http.server 8000
 ```
 
 Open `http://localhost:8000`, enter a safe Apps Script deployment URL, and test
-create, history/search, detail, both image uploads, clipboard fallbacks, caption
-editing, and Facebook publication on a test Page before deploying to production.
+create, history/search, detail, donor-data editing and poster invalidation, both
+image uploads, clipboard fallbacks, caption editing, and Facebook publication on
+a test Page before deploying to production.
