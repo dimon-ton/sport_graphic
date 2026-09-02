@@ -82,7 +82,7 @@
         </div>
 
         <div class="upload-card">
-          <div class="upload-copy"><strong>ภาพผู้บริจาค (ไม่บังคับ)</strong><p>ใช้เป็นภาพอ้างอิงบุคคลสำหรับ AI</p></div>
+          <div class="upload-copy"><strong>ภาพผู้บริจาค (ไม่บังคับ)</strong><p>เพิ่มเพื่อใช้เป็นภาพอ้างอิงบุคคลสำหรับ AI · หากไม่เพิ่ม ระบบจะสร้าง Prompt สำหรับโปสเตอร์กราฟิกล้วนโดยไม่มีบุคคล</p></div>
           <div id="donorEmptyState" class="donor-empty-state">
             <button id="addDonorImageBtn" class="image-add-button" type="button">🖼️ เพิ่มภาพผู้บริจาค</button>
             <small>JPG, PNG · สูงสุด 10 MB</small>
@@ -205,7 +205,18 @@
     let connectionOnline = navigator.onLine;
     const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     const DONOR_PORTRAIT_INSTRUCTION = 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.';
-    const NO_DONOR_PORTRAIT_INSTRUCTION = 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
+    const NO_DONOR_PORTRAIT_INSTRUCTION = 'HIGHEST-PRIORITY PERSON-FREE RULE: No donor portrait was supplied. Create a fully graphic poster with absolutely no people or human representations anywhere. Do not show a face, head, body, hands, crowd, athlete, student, silhouette, shadow-person, mannequin, avatar, character, stock-photo person, person mockup, photo placeholder, empty portrait frame, or invented identity. This rule overrides every later instruction and the selected visual style. Express appreciation through typography and non-human school sports-day graphics only.';
+    const LEGACY_NO_DONOR_PORTRAIT_INSTRUCTION = 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
+    const DONOR_PORTRAIT_DATA_LINE = '- Donor portrait: use the supplied portrait according to the identity-reference instruction above';
+    const NO_DONOR_PORTRAIT_DATA_LINE = '- Donor portrait: none supplied; the poster must remain entirely person-free';
+    const DONOR_SPORTS_DAY_FIGURE_CUE = '- subtle silhouettes or graphic motifs of student athletes running, competing, or celebrating together';
+    const NO_DONOR_SPORTS_DAY_FIGURE_CUE = '- person-free sports graphics such as running-track curves, lane markings, team-color flags, trophies, medals, stadium lights, scoreless field geometry, and motion lines; never use human or human-like figures';
+    const DONOR_PORTRAIT_AREA_INSTRUCTION = 'Place the donor portrait prominently in the center. Preserve the donor’s real facial identity accurately. Do not alter facial structure, age, body proportions, hairstyle, or recognizable features. Professionally remove the original photo background and integrate the person naturally into the poster. Use flattering professional lighting, subtle edge lighting, natural skin texture, and realistic photographic detail. Do not make the person look illustrated, cartoonish, plastic, or AI-generated. Behind the donor, place an elegant symmetrical framing motif appropriate to the selected visual style, without covering the face or body. Use restrained glow, lighting, or tonal contrast appropriate to the selected visual style to separate the person from the background.';
+    const NO_DONOR_PORTRAIT_AREA_INSTRUCTION = 'Do not reserve or imitate a portrait area. Build the central focal point entirely from abstract, non-human school sports-day graphics: sweeping running-track lanes, coordinated team-color ribbons and flags, stadium-light arcs, a trophy, medal, laurel, or energetic geometric motion. Keep the donor name as the primary appreciation focus. Do not include any photographic panel, portrait-shaped placeholder, empty frame, person mockup, or human-like form.';
+    const DONOR_PORTRAIT_COMPOSITION_ITEM = 'Donor portrait with a style-appropriate framing motif';
+    const NO_DONOR_PORTRAIT_COMPOSITION_ITEM = 'Person-free abstract school sports-day focal graphic';
+    const DONOR_PORTRAIT_QUALITY_REQUIREMENT = 'realistic portrait integration';
+    const NO_DONOR_PORTRAIT_QUALITY_REQUIREMENT = 'strictly person-free graphic composition with no portrait placeholder or human-like imagery';
 
     function apiUrl() {
       const url = elements.appsScriptUrl.value.trim();
@@ -260,21 +271,41 @@
 
     function buildPrompt(donation) {
       const style = randomPromptStyle();
-      const portraitInstruction = donation.donorImageId
-        ? DONOR_PORTRAIT_INSTRUCTION
-        : NO_DONOR_PORTRAIT_INSTRUCTION;
+      const hasPortrait = Boolean(donation.donorImageId);
+      const portraitInstruction = hasPortrait ? DONOR_PORTRAIT_INSTRUCTION : NO_DONOR_PORTRAIT_INSTRUCTION;
+      const styleDirection = hasPortrait ? style.direction : personFreeStyleDirection(style.direction);
       return promptTemplate.replaceAll('[DONOR_NAME]', donation.donorName)
         .replaceAll('[DONATION_TYPE]', donation.donationType)
         .replaceAll('[DONATION_DETAIL]', donation.donationDetail)
         .replaceAll('[PORTRAIT_INSTRUCTION]', portraitInstruction)
+        .replaceAll('[PORTRAIT_DATA_LINE]', hasPortrait ? DONOR_PORTRAIT_DATA_LINE : NO_DONOR_PORTRAIT_DATA_LINE)
+        .replaceAll('[SPORTS_DAY_FIGURE_CUE]', hasPortrait ? DONOR_SPORTS_DAY_FIGURE_CUE : NO_DONOR_SPORTS_DAY_FIGURE_CUE)
+        .replaceAll('[PORTRAIT_AREA_INSTRUCTION]', hasPortrait ? DONOR_PORTRAIT_AREA_INSTRUCTION : NO_DONOR_PORTRAIT_AREA_INSTRUCTION)
+        .replaceAll('[PORTRAIT_COMPOSITION_ITEM]', hasPortrait ? DONOR_PORTRAIT_COMPOSITION_ITEM : NO_DONOR_PORTRAIT_COMPOSITION_ITEM)
+        .replaceAll('[PORTRAIT_QUALITY_REQUIREMENT]', hasPortrait ? DONOR_PORTRAIT_QUALITY_REQUIREMENT : NO_DONOR_PORTRAIT_QUALITY_REQUIREMENT)
         .replaceAll('[STYLE_NAME]', style.name)
-        .replaceAll('[STYLE_DIRECTION]', style.direction);
+        .replaceAll('[STYLE_DIRECTION]', styleDirection);
+    }
+
+    function personFreeStyleDirection(direction) {
+      return String(direction).split('. ')
+        .filter((sentence) => !/\b(?:portrait|person)\b/i.test(sentence))
+        .join('. ')
+        .trim();
     }
 
     function addDonorPortraitToPrompt(prompt) {
-      const currentPrompt = String(prompt || '');
+      let currentPrompt = String(prompt || '');
       if (currentPrompt.includes(DONOR_PORTRAIT_INSTRUCTION)) return currentPrompt;
-      if (currentPrompt.includes(NO_DONOR_PORTRAIT_INSTRUCTION)) return currentPrompt.replace(NO_DONOR_PORTRAIT_INSTRUCTION, DONOR_PORTRAIT_INSTRUCTION);
+      currentPrompt = currentPrompt
+        .replace(NO_DONOR_PORTRAIT_INSTRUCTION, DONOR_PORTRAIT_INSTRUCTION)
+        .replace(LEGACY_NO_DONOR_PORTRAIT_INSTRUCTION, DONOR_PORTRAIT_INSTRUCTION)
+        .replace(NO_DONOR_PORTRAIT_DATA_LINE, DONOR_PORTRAIT_DATA_LINE)
+        .replace(NO_DONOR_SPORTS_DAY_FIGURE_CUE, DONOR_SPORTS_DAY_FIGURE_CUE)
+        .replace(NO_DONOR_PORTRAIT_AREA_INSTRUCTION, DONOR_PORTRAIT_AREA_INSTRUCTION)
+        .replace(NO_DONOR_PORTRAIT_COMPOSITION_ITEM, DONOR_PORTRAIT_COMPOSITION_ITEM)
+        .replace(NO_DONOR_PORTRAIT_QUALITY_REQUIREMENT, DONOR_PORTRAIT_QUALITY_REQUIREMENT);
+      if (currentPrompt.includes(DONOR_PORTRAIT_INSTRUCTION)) return currentPrompt;
       return `${DONOR_PORTRAIT_INSTRUCTION}\n\n${currentPrompt}`.trim();
     }
 

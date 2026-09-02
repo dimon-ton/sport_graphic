@@ -16,7 +16,7 @@ VARIABLE DATA:
 
 - Donation detail: [DONATION_DETAIL]
 
-- Donor portrait: follow the portrait reference instruction above
+[PORTRAIT_DATA_LINE]
 
 STRICT DATA RULE:
 
@@ -128,8 +128,7 @@ composition. Use several of the following as supporting design elements:
 - running-track lanes, athletic-field markings, or a softly lit school stadium
 - flowing team-color flags, ribbons, pennants, or fabric accents in coordinated
   red, blue, green, and yellow
-- subtle silhouettes or graphic motifs of student athletes running, competing,
-  or celebrating together
+[SPORTS_DAY_FIGURE_CUE]
 - cheering-stand energy, stadium lights, victory arcs, medals, trophies, or
   laurel details
 - dynamic motion lines and festive color-team particles that suggest friendly
@@ -151,25 +150,9 @@ that follows the selected visual style while remaining highly legible.
 
 Place the event description below the donor name in clean white typography.
 
-PORTRAIT AREA:
+CENTRAL VISUAL AREA:
 
-Place the donor portrait prominently in the center.
-
-Preserve the donor’s real facial identity accurately.
-
-Do not alter facial structure, age, body proportions, hairstyle, or recognizable features.
-
-Professionally remove the original photo background and integrate the person naturally into the poster.
-
-Use flattering professional lighting, subtle edge lighting, natural skin texture, and realistic photographic detail.
-
-Do not make the person look illustrated, cartoonish, plastic, or AI-generated.
-
-Behind the donor, place an elegant symmetrical framing motif appropriate to the
-selected visual style, without covering the face or body.
-
-Use restrained glow, lighting, or tonal contrast appropriate to the selected
-visual style to separate the person from the background.
+[PORTRAIT_AREA_INSTRUCTION]
 
 DONATION DETAIL CARD:
 
@@ -218,7 +201,7 @@ Maintain strong visual hierarchy:
 
 4. Event description
 
-5. Donor portrait with golden laurel
+5. [PORTRAIT_COMPOSITION_ITEM]
 
 6. Donation detail card
 
@@ -242,7 +225,7 @@ HIGH QUALITY REQUIREMENTS:
 
 - centered alignment
 
-- realistic portrait integration
+- [PORTRAIT_QUALITY_REQUIREMENT]
 
 - refined decorative effects appropriate to the selected visual style
 
