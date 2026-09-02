@@ -1,0 +1,33 @@
+{
+  "id": "./",
+  "name": "ระบบจัดการสื่อขอบคุณผู้บริจาค",
+  "short_name": "สื่อผู้บริจาค",
+  "description": "บันทึกข้อมูล สร้างสื่อขอบคุณผู้บริจาค และจัดการการเผยแพร่ของโรงเรียนบ้านโพนแท่น",
+  "lang": "th",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#4c1d95",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

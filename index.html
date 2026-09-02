@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4c1d95">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="สื่อผู้บริจาค">
   <title>ระบบจัดการสื่อขอบคุณผู้บริจาค</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="app-body">
@@ -14,11 +22,19 @@
         <h1>ระบบจัดการสื่อขอบคุณผู้บริจาค</h1>
         <p>บันทึกข้อมูล สร้าง Prompt จัดเก็บโปสเตอร์ และเผยแพร่ Facebook ในที่เดียว</p>
       </div>
-      <nav class="tabs" aria-label="หน้าหลัก" role="tablist">
-        <button class="tab active" data-view="create" role="tab" aria-selected="true">เพิ่มรายการ</button>
-        <button class="tab" data-view="history" role="tab" aria-selected="false">ประวัติการบริจาค</button>
-      </nav>
+      <div class="header-controls">
+        <button id="installAppBtn" class="install-button hidden" type="button">ติดตั้งแอป</button>
+        <nav class="tabs" aria-label="หน้าหลัก" role="tablist">
+          <button class="tab active" data-view="create" role="tab" aria-selected="true">เพิ่มรายการ</button>
+          <button class="tab" data-view="history" role="tab" aria-selected="false">ประวัติการบริจาค</button>
+        </nav>
+      </div>
     </header>
+
+    <div id="offlineBanner" class="offline-banner hidden" role="status" aria-live="polite">
+      <span aria-hidden="true">●</span>
+      <p><strong>กำลังใช้งานแบบออฟไลน์</strong> เปิดดูแบบฟอร์มได้ แต่การบันทึก ประวัติ อัปโหลด และเผยแพร่ต้องเชื่อมต่ออินเทอร์เน็ต</p>
+    </div>
 
     <details class="settings-card">
       <summary>
@@ -177,6 +193,7 @@
     let generatedImageFile = null;
     let currentDonation = null;
     let searchTimer = null;
+    let connectionOnline = navigator.onLine;
     const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     const DONOR_PORTRAIT_INSTRUCTION = 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.';
     const NO_DONOR_PORTRAIT_INSTRUCTION = 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
@@ -188,6 +205,7 @@
     }
 
     function apiGet(action, parameters = {}) {
+      if (!connectionOnline) return Promise.reject(new Error('กรุณาเชื่อมต่ออินเทอร์เน็ตก่อนดำเนินการ'));
       return new Promise((resolve, reject) => {
         const callback = `donationCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
         const script = document.createElement('script');
@@ -205,6 +223,7 @@
     }
 
     function apiPost(action, payload = {}) {
+      if (!connectionOnline) return Promise.reject(new Error('กรุณาเชื่อมต่ออินเทอร์เน็ตก่อนดำเนินการ'));
       return new Promise((resolve, reject) => {
         const nonce = `request_${Date.now()}_${Math.random().toString(36).slice(2)}`;
         const iframe = document.createElement('iframe');
@@ -275,7 +294,63 @@
     function typeLabel(type) { return type === 'in-kind' ? 'สิ่งของ' : 'เงิน'; }
     function statusLabel(status) { return { draft: 'รอโปสเตอร์', ready: 'พร้อมเผยแพร่', publishing: 'กำลังเผยแพร่', published: 'เผยแพร่แล้ว', publish_failed: 'เผยแพร่ไม่สำเร็จ' }[status] || status || 'รอดำเนินการ'; }
     function showToast(message, isError = false) { elements.toast.textContent = message; elements.toast.className = `toast ${isError ? 'error' : ''}`; window.setTimeout(() => elements.toast.classList.add('hidden'), 3500); }
-    function setBusy(button, busy, text) { if (!button.dataset.label) button.dataset.label = button.textContent; button.disabled = busy; button.textContent = busy ? text : button.dataset.label; }
+    function setBusy(button, busy, text) { if (!button.dataset.label) button.dataset.label = button.textContent; button.disabled = busy || (!connectionOnline && button.hasAttribute('data-online-action')); button.textContent = busy ? text : button.dataset.label; }
+
+    const onlineActionIds = [
+      'addDonorImageBtn', 'changeDonorImageBtn', 'takePhotoBtn', 'choosePhotoBtn',
+      'donorCameraInput', 'donorFileInput', 'submitBtn', 'refreshBtn',
+      'openDeleteDialogBtn', 'confirmDeleteBtn', 'detailDonorImageInput',
+      'saveDetailDonorImageBtn', 'saveCaptionBtn', 'generatedImageInput',
+      'saveGeneratedImageBtn', 'publishBtn'
+    ];
+    onlineActionIds.forEach((id) => elements[id].setAttribute('data-online-action', ''));
+    const historyTab = document.querySelector('.tab[data-view="history"]');
+    historyTab.setAttribute('data-online-action', '');
+
+    function updateConnectivity(event) {
+      if (event && event.type === 'online') connectionOnline = true;
+      else if (event && event.type === 'offline') connectionOnline = false;
+      else connectionOnline = navigator.onLine;
+      const online = connectionOnline;
+      elements.offlineBanner.classList.toggle('hidden', online);
+      document.querySelectorAll('[data-online-action]').forEach((control) => {
+        if (!online && !control.hasAttribute('data-disabled-before-offline')) {
+          control.dataset.disabledBeforeOffline = String(control.disabled);
+          control.disabled = true;
+        } else if (online && control.hasAttribute('data-disabled-before-offline')) {
+          control.disabled = control.dataset.disabledBeforeOffline === 'true';
+          delete control.dataset.disabledBeforeOffline;
+        }
+      });
+    }
+
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      elements.installAppBtn.classList.remove('hidden');
+    });
+    elements.installAppBtn.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      elements.installAppBtn.classList.add('hidden');
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      elements.installAppBtn.classList.add('hidden');
+      showToast('ติดตั้งแอปเรียบร้อยแล้ว');
+    });
+    window.addEventListener('online', updateConnectivity);
+    window.addEventListener('offline', updateConnectivity);
+    updateConnectivity();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch((error) => console.error('Service worker registration failed:', error));
+      });
+    }
 
     async function copyText(text, successMessage) {
       try { await navigator.clipboard.writeText(text); showToast(successMessage); }
@@ -395,7 +470,7 @@
       elements.generatedUploadPreview.classList.add('hidden'); elements.saveGeneratedImageBtn.classList.add('hidden'); generatedImageFile = null;
       elements.facebookResult.classList.toggle('hidden', !donation.facebookPostId);
       elements.facebookResult.innerHTML = donation.facebookPostId ? `เผยแพร่แล้วเมื่อ ${formatDate(donation.facebookPublishedAt)} · <a href="${escapeHtml(donation.facebookPostUrl)}" target="_blank" rel="noopener">เปิดโพสต์ Facebook</a>` : '';
-      const canPublish = donation.generatedImageId && donation.caption && !donation.facebookPostId && donation.publishingStatus !== 'publishing'; elements.publishBtn.disabled = !canPublish; elements.publishBtn.textContent = donation.facebookPostId ? 'เผยแพร่ไปยัง Facebook แล้ว' : donation.generatedImageId ? 'เผยแพร่ภาพและแคปชันไปยัง Facebook' : 'อัปโหลดโปสเตอร์ก่อนเผยแพร่';
+      const canPublish = donation.generatedImageId && donation.caption && !donation.facebookPostId && donation.publishingStatus !== 'publishing'; elements.publishBtn.disabled = !connectionOnline || !canPublish; elements.publishBtn.textContent = donation.facebookPostId ? 'เผยแพร่ไปยัง Facebook แล้ว' : donation.generatedImageId ? 'เผยแพร่ภาพและแคปชันไปยัง Facebook' : 'อัปโหลดโปสเตอร์ก่อนเผยแพร่';
     }
 
     function showImage(image, url, emptyMessage) { image.classList.toggle('hidden', !url); if (url) image.src = url; if (emptyMessage) emptyMessage.classList.toggle('hidden', Boolean(url)); }

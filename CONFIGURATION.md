@@ -5,6 +5,25 @@ Sheets is the record database, and Google Drive stores both donor portraits and
 generated posters. Sheets contains Drive file IDs and URLs; it does not contain
 base64 image data.
 
+## Progressive web app installation and caching
+
+Serve the production site over HTTPS so browsers can register `service-worker.js`
+and offer installation. Localhost is also treated as a secure context for local
+testing. The manifest and service-worker paths are relative, so the site may be
+hosted at a domain root or a repository subpath.
+
+After one successful online load, the service worker caches the page shell,
+compiled CSS, prompt resources, manifest, and icons. Offline mode can reopen the
+interface, but it does not store drafts or queue work. Saving donations, loading
+history, uploading images, editing records, deleting records, and publishing to
+Facebook remain online-only. Apps Script responses, Drive images, Facebook
+resources, administrator credentials, and form data are never added to the PWA
+cache.
+
+When changing cached application files, increment `CACHE_NAME` in
+`service-worker.js`. Existing installations will download the new shell and
+remove the previous cache when the updated worker activates.
+
 ## Deploy the Apps Script backend
 
 1. Push `Code.js` and `appsscript.json` to the existing Apps Script project with
