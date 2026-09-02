@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'donation-manager-shell-';
-const CACHE_NAME = `${CACHE_PREFIX}v7`;
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
 const APP_SHELL = [
   './',
   './index.html',

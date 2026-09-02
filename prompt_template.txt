@@ -1,12 +1,30 @@
-Create a premium vertical Thai school appreciation poster based closely on the provided reference image.
+Create a premium vertical donor-appreciation poster whose dominant visual identity is a festive Thai school internal color-sports day (กีฬาสี).
 
-IMPORTANT:
+PRIMARY VISUAL IDENTITY — HIGHEST PRIORITY:
+
+The result must be recognizable at first glance as an official school sports-day
+poster, before it reads as a donor or ceremonial poster. Build the visual language
+around a school running track or athletic field, coordinated red, blue, green,
+and yellow team-color flags, energetic ribbons, stadium lights, trophies, medals,
+and friendly inter-team celebration.
+
+Keep the finish polished and suitable for an official school Facebook post, but
+do not let luxury, gala, corporate, academic, celestial, floral, heritage, or
+festival styling replace the school sports-day atmosphere. Do not depict a
+professional league, professional team, or one specific sport as the sole theme.
+
+REFERENCE IMAGE RULE:
 
 Use the provided reference poster only as the DESIGN AND LAYOUT REFERENCE.
 
+The reference may guide composition, hierarchy, proportions, typography
+placement, and decorative finish. It must never override the PRIMARY VISUAL
+IDENTITY or turn the result into a generic appreciation, gala, or corporate poster.
+
 [PORTRAIT_INSTRUCTION]
 
-The overall composition, visual hierarchy, proportions, typography placement, decorative elements, and premium celebratory atmosphere should closely follow the reference poster.
+Follow the reference poster's useful layout qualities while translating its
+decoration into unmistakable school sports-day graphics.
 
 VARIABLE DATA:
 
@@ -116,11 +134,10 @@ these design instructions as text on the poster.
 
 [STYLE_DIRECTION]
 
-REQUIRED SCHOOL SPORTS-DAY IDENTITY:
+SCHOOL SPORTS-DAY DESIGN DETAILS:
 
-Regardless of the selected visual style, the finished poster must immediately
-feel like an appreciation poster for a Thai school internal sports day
-(กีฬาสี), not a generic luxury, corporate, or ceremonial donor poster.
+The selected visual style controls palette, texture, lighting, and graphic
+treatment only. School sports-day identity always controls the subject matter.
 
 Integrate clear but tasteful school sports-day visual cues throughout the
 composition. Use several of the following as supporting design elements:
@@ -134,8 +151,9 @@ composition. Use several of the following as supporting design elements:
 - dynamic motion lines and festive color-team particles that suggest friendly
   inter-team competition
 
-Blend these elements naturally into the selected visual style and keep them
-secondary to the donor, donation information, and required text. The
+Blend these elements naturally into the selected visual style and make them
+clearly visible without competing with the donor, donation information, or
+required text. The
 multi-color accents should feel coordinated and premium rather than rainbow-like
 or childish. Do not invent team names, scores, mascots, school logos, uniforms,
 event dates, numbers, or any additional text. Do not depict professional sports
