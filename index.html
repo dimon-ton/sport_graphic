@@ -103,13 +103,20 @@
 
     <section id="historyView" class="view-panel hidden">
       <div class="section-heading history-heading">
-        <div><span>02</span><h2>ประวัติการบริจาค</h2></div>
-        <button id="refreshBtn" class="secondary-button">รีเฟรช</button>
+        <div><h2>ประวัติการบริจาค</h2></div>
+        <button id="refreshBtn" class="history-refresh-button" type="button"><span aria-hidden="true">↻</span> รีเฟรช</button>
       </div>
       <div class="filters">
         <input id="searchInput" type="search" placeholder="ค้นหาชื่อ รายละเอียด หรือ ID">
-        <select id="typeFilter"><option value="">ทุกประเภท</option><option value="money">เงิน</option><option value="in-kind">สิ่งของ</option></select>
-        <select id="statusFilter"><option value="">ทุกสถานะ</option><option value="draft">รอโปสเตอร์</option><option value="ready">พร้อมเผยแพร่</option><option value="published">เผยแพร่แล้ว</option><option value="publish_failed">เผยแพร่ไม่สำเร็จ</option></select>
+        <div class="filter-chips" aria-label="กรองประวัติการบริจาค">
+          <button class="filter-chip active" type="button" data-donation-type="" data-publishing-status="" aria-pressed="true">ทั้งหมด</button>
+          <button class="filter-chip" type="button" data-donation-type="money" data-publishing-status="" aria-pressed="false">เงิน</button>
+          <button class="filter-chip" type="button" data-donation-type="in-kind" data-publishing-status="" aria-pressed="false">สิ่งของ</button>
+          <button class="filter-chip" type="button" data-donation-type="" data-publishing-status="draft" aria-pressed="false">รอโปสเตอร์</button>
+          <button class="filter-chip" type="button" data-donation-type="" data-publishing-status="ready" aria-pressed="false">พร้อมเผยแพร่</button>
+          <button class="filter-chip" type="button" data-donation-type="" data-publishing-status="published" aria-pressed="false">เผยแพร่แล้ว</button>
+          <button class="filter-chip" type="button" data-donation-type="" data-publishing-status="publish_failed" aria-pressed="false">เผยแพร่ไม่สำเร็จ</button>
+        </div>
       </div>
       <div id="historyLoading" class="empty-state hidden">กำลังโหลดข้อมูล...</div>
       <div id="donationList" class="donation-list"></div>
@@ -193,6 +200,8 @@
     let generatedImageFile = null;
     let currentDonation = null;
     let searchTimer = null;
+    let donationTypeFilter = '';
+    let publishingStatusFilter = '';
     let connectionOnline = navigator.onLine;
     const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     const DONOR_PORTRAIT_INSTRUCTION = 'Use the uploaded donor portrait as the PERSON / IDENTITY REFERENCE. Preserve this person’s identity accurately.';
@@ -298,7 +307,7 @@
 
     const onlineActionIds = [
       'addDonorImageBtn', 'changeDonorImageBtn', 'takePhotoBtn', 'choosePhotoBtn',
-      'donorCameraInput', 'donorFileInput', 'submitBtn', 'refreshBtn',
+      'donorCameraInput', 'donorFileInput', 'submitBtn', 'refreshBtn', 'searchInput',
       'openDeleteDialogBtn', 'confirmDeleteBtn', 'detailDonorImageInput',
       'saveDetailDonorImageBtn', 'saveCaptionBtn', 'generatedImageInput',
       'saveGeneratedImageBtn', 'publishBtn'
@@ -306,6 +315,8 @@
     onlineActionIds.forEach((id) => elements[id].setAttribute('data-online-action', ''));
     const historyTab = document.querySelector('.tab[data-view="history"]');
     historyTab.setAttribute('data-online-action', '');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    filterChips.forEach((chip) => chip.setAttribute('data-online-action', ''));
 
     function updateConnectivity(event) {
       if (event && event.type === 'online') connectionOnline = true;
@@ -435,7 +446,7 @@
     async function loadDonations() {
       elements.historyLoading.classList.remove('hidden'); elements.historyEmpty.classList.add('hidden'); elements.donationList.innerHTML = '';
       try {
-        const result = await apiPost('listDonations', { search: elements.searchInput.value, donationType: elements.typeFilter.value, publishingStatus: elements.statusFilter.value });
+        const result = await apiPost('listDonations', { search: elements.searchInput.value, donationType: donationTypeFilter, publishingStatus: publishingStatusFilter });
         elements.donationList.innerHTML = result.donations.map((donation) => `<button class="donation-row" data-id="${escapeHtml(donation.id)}"><div class="thumbnail">${donation.donorImageUrl ? `<img src="${escapeHtml(donation.donorImageUrl)}" alt="">` : '<span>🤝</span>'}</div><div class="record-main"><strong>${escapeHtml(donation.donorName)}</strong><p>${escapeHtml(donation.donationDetail)}</p><small>${formatDate(donation.createdAt)}</small></div><span class="type-pill">${typeLabel(donation.donationType)}</span><span class="image-status">${donation.generatedImageId ? 'มีโปสเตอร์' : 'ยังไม่มีโปสเตอร์'}</span><span class="status-badge status-${escapeHtml(donation.publishingStatus)}">${statusLabel(donation.publishingStatus)}</span></button>`).join('');
         elements.historyEmpty.classList.toggle('hidden', result.donations.length > 0);
         document.querySelectorAll('.donation-row').forEach((row) => row.addEventListener('click', () => openDonation(row.dataset.id)));
@@ -553,7 +564,16 @@
     });
 
     elements.refreshBtn.addEventListener('click', loadDonations);
-    [elements.typeFilter, elements.statusFilter].forEach((input) => input.addEventListener('change', loadDonations));
+    filterChips.forEach((chip) => chip.addEventListener('click', () => {
+      donationTypeFilter = chip.dataset.donationType;
+      publishingStatusFilter = chip.dataset.publishingStatus;
+      filterChips.forEach((item) => {
+        const active = item === chip;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      loadDonations();
+    }));
     elements.searchInput.addEventListener('input', () => { window.clearTimeout(searchTimer); searchTimer = window.setTimeout(loadDonations, 350); });
   </script>
 </body>
