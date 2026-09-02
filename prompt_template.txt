@@ -13,18 +13,10 @@ do not let luxury, gala, corporate, academic, celestial, floral, heritage, or
 festival styling replace the school sports-day atmosphere. Do not depict a
 professional league, professional team, or one specific sport as the sole theme.
 
-REFERENCE IMAGE RULE:
-
-Use the provided reference poster only as the DESIGN AND LAYOUT REFERENCE.
-
-The reference may guide composition, hierarchy, proportions, typography
-placement, and decorative finish. It must never override the PRIMARY VISUAL
-IDENTITY or turn the result into a generic appreciation, gala, or corporate poster.
-
 [PORTRAIT_INSTRUCTION]
 
-Follow the reference poster's useful layout qualities while translating its
-decoration into unmistakable school sports-day graphics.
+Treat every instruction below as the complete design brief and build the full
+composition directly from it.
 
 VARIABLE DATA:
 
@@ -203,7 +195,7 @@ Use Footer message from FIXED SCHOOL INFORMATION exactly.
 Use bold white Thai typography.
 
 Finish the bottom edge with a polished decorative treatment that follows the
-selected visual style and maintains the visual language of the reference.
+selected visual style and maintains the school sports-day visual language.
 
 COMPOSITION:
 
