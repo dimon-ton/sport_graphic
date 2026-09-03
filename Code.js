@@ -387,27 +387,49 @@ function publishFacebook_(payload) {
 // Isolated Facebook service. Page Photos accepts an image source and message.
 function publishPhotoToFacebook_(donation, suppliedAccessToken) {
   const properties = PropertiesService.getScriptProperties();
-  const pageId = properties.getProperty('FACEBOOK_PAGE_ID');
   const accessToken = String(suppliedAccessToken || '').trim() || properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN');
   const version = properties.getProperty('FACEBOOK_GRAPH_API_VERSION') || DEFAULT_GRAPH_API_VERSION;
-  if (!pageId || !accessToken) throw new Error('Facebook Page configuration is incomplete.');
+  if (!accessToken) throw new Error('Facebook Page Access Token is not configured.');
+  const identityResponse = UrlFetchApp.fetch(
+    'https://graph.facebook.com/' + encodeURIComponent(version) + '/me?fields=id',
+    { headers: { Authorization: 'Bearer ' + accessToken }, muteHttpExceptions: true }
+  );
+  const identity = parseFacebookResponse_(identityResponse);
+  if (identityResponse.getResponseCode() >= 300 || identity.error || !identity.id) {
+    throw new Error(facebookErrorMessage_(identity, 'Could not identify the Facebook Page from the access token.'));
+  }
+  const pageId = String(identity.id);
   const response = UrlFetchApp.fetch(
     'https://graph.facebook.com/' + encodeURIComponent(version) + '/' + encodeURIComponent(pageId) + '/photos',
     {
       method: 'post',
+      headers: { Authorization: 'Bearer ' + accessToken },
       payload: {
         source: DriveApp.getFileById(donation.generatedImageId).getBlob(),
-        message: donation.caption, published: 'true', access_token: accessToken
+        message: donation.caption, published: 'true'
       },
       muteHttpExceptions: true
     }
   );
-  const body = JSON.parse(response.getContentText() || '{}');
+  const body = parseFacebookResponse_(response);
   if (response.getResponseCode() >= 300 || body.error) {
-    throw new Error(body.error && body.error.message || 'Facebook publishing failed.');
+    throw new Error(facebookErrorMessage_(body, 'Facebook publishing failed.'));
   }
   if (!body.id && !body.post_id) throw new Error('Facebook returned no photo or post ID.');
   return body;
+}
+
+function parseFacebookResponse_(response) {
+  try { return JSON.parse(response.getContentText() || '{}'); }
+  catch (error) { throw new Error('Facebook returned an invalid response.'); }
+}
+
+function facebookErrorMessage_(body, fallback) {
+  const error = body && body.error || {};
+  const details = [];
+  if (error.code != null) details.push('code ' + error.code);
+  if (error.error_subcode != null) details.push('subcode ' + error.error_subcode);
+  return String(error.message || fallback) + (details.length ? ' (Facebook ' + details.join(', ') + ')' : '');
 }
 
 function listDonations_(payload) {

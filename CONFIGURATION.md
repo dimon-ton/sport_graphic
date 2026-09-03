@@ -83,14 +83,15 @@ Set these values in **Apps Script > Project settings > Script properties**:
 | Property | Value |
 | --- | --- |
 | `ADMIN_ACCESS_KEY` | A long random passphrase used to protect every data and publishing operation |
-| `FACEBOOK_PAGE_ID` | Numeric ID of the Facebook Page |
+| `FACEBOOK_PAGE_ID` | Legacy optional setting; publishing uses the Page identity represented by the token |
 | `FACEBOOK_PAGE_ACCESS_TOKEN` | Page access token with permission to publish Page posts |
 | `FACEBOOK_GRAPH_API_VERSION` | Optional pinned version, currently `v26.0` by default |
 
 The settings card also accepts a Facebook Page access token for the current
 browser session. It is masked, kept in `sessionStorage`, cleared when the browser
 session ends, and sent only in the authenticated `publishFacebook` POST body.
-When that field is blank, the backend falls back to
+The backend derives the Page ID from that token, so a stale `FACEBOOK_PAGE_ID`
+cannot redirect or block publishing. When the frontend field is blank, the backend falls back to
 `FACEBOOK_PAGE_ACCESS_TOKEN` in Script Properties. Never place the token in
 source code, local storage, a URL, a spreadsheet cell, or a committed file.
 `.env.example` documents property names only and is not loaded by the app.
