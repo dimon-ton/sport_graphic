@@ -306,6 +306,7 @@
       return promptTemplate.replaceAll('[DONOR_NAME]', donation.donorName)
         .replaceAll('[DONATION_TYPE]', donation.donationType)
         .replaceAll('[DONATION_DETAIL]', donation.donationDetail)
+        .replaceAll('[SUPPORTING_TEXT]', buildPosterSupportingText(donation))
         .replaceAll('[PORTRAIT_INSTRUCTION]', portraitInstruction)
         .replaceAll('[PORTRAIT_DATA_LINE]', hasPortrait ? DONOR_PORTRAIT_DATA_LINE : NO_DONOR_PORTRAIT_DATA_LINE)
         .replaceAll('[SPORTS_DAY_FIGURE_CUE]', hasPortrait ? DONOR_SPORTS_DAY_FIGURE_CUE : NO_DONOR_SPORTS_DAY_FIGURE_CUE)
@@ -314,6 +315,12 @@
         .replaceAll('[PORTRAIT_QUALITY_REQUIREMENT]', hasPortrait ? DONOR_PORTRAIT_QUALITY_REQUIREMENT : NO_DONOR_PORTRAIT_QUALITY_REQUIREMENT)
         .replaceAll('[STYLE_NAME]', style.name)
         .replaceAll('[STYLE_DIRECTION]', styleDirection);
+    }
+
+    function buildPosterSupportingText(donation) {
+      return donation.donationType === 'money'
+        ? `ที่ได้${SCHOOL.event} ด้วย เงินจำนวน ${donation.donationDetail}`
+        : `ที่ได้${SCHOOL.event} ด้วยการบริจาค ${donation.donationDetail}`;
     }
 
     function personFreeStyleDirection(direction) {
