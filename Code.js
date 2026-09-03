@@ -363,9 +363,6 @@ function publishFacebook_(payload) {
     }
     if (donation.publishingStatus === 'publishing') throw new Error('This donation is already being published.');
     if (isActiveKieState_(donation.kieTaskState)) throw new Error('Kie AI is still generating this poster.');
-    if (donation.kieTaskId && donation.kieTaskState === 'success' && donation.kieOutputCropped !== 'true') {
-      throw new Error('Wait for the Kie AI poster to be cropped to 1440 x 1800 before publishing.');
-    }
     if (!donation.generatedImageId) throw new Error('A generated image is required before publishing.');
     if (!String(donation.caption || '').trim()) throw new Error('A caption is required before publishing.');
     donation.publishingStatus = 'publishing';

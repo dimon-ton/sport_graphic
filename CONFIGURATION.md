@@ -51,9 +51,8 @@ proxy before use.
 The generated-poster card can submit the saved prompt directly to Kie AI. The
 Apps Script backend creates an asynchronous GPT Image 2 task, while the browser
 polls its status with increasing delays. When generation finishes, Apps Script
-immediately downloads the temporary provider result into Google Drive. The
-browser then center-crops the 3:4 source and saves a PNG at exactly 1440 × 1800
-pixels (4:5) back to the same donation record.
+immediately downloads the temporary provider result into Google Drive. The app
+keeps the original 2K image at the configured aspect ratio without cropping it.
 
 Set these values in **Apps Script > Project settings > Script properties**:
 
@@ -68,11 +67,10 @@ Set these values in **Apps Script > Project settings > Script properties**:
 The school logo at
 `https://raw.githubusercontent.com/dimon-ton/sport_graphic/main/school_logo.png`
 is always the first image reference; `KIE_SCHOOL_LOGO_URL` may override it. The
-donor portrait, when present, is the second reference. GPT Image 2 at 2K does not support 4:5 through Kie AI,
-so the default uses 3:4 with a centered crop-safe composition. Keep the browser
-record dialog open until the final 1440 × 1800 PNG is saved. If it is closed,
-reopen the record later; polling and final cropping resume from the task state
-stored in the `Donations` sheet.
+donor portrait, when present, is the second reference. GPT Image 2 at 2K does not
+support 4:5 through Kie AI, so the default keeps the original 3:4 output. The
+generation task state is stored in the `Donations` sheet, so the record can be
+closed and reopened while generation is running.
 
 The GitHub default also works during local development because Kie AI can reach
 it over HTTPS. Do not place `KIE_API_KEY` in `index.html`, local storage, URLs,
