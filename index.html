@@ -188,7 +188,10 @@
           <div class="card-title"><h3>โปสเตอร์ที่สร้างแล้ว</h3><div><button id="copyGeneratedImageBtn" class="text-button">คัดลอก</button><a id="openGeneratedImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div>
           <img id="detailGeneratedImage" class="poster-preview hidden" alt="โปสเตอร์ที่สร้างแล้ว">
           <p id="noGeneratedImage" class="muted">ยังไม่ได้อัปโหลดโปสเตอร์</p>
-          <button id="generateKieBtn" class="kie-generate-button" type="button">✨ สร้างด้วย Kie AI · GPT Image 2</button>
+          <button id="generateKieBtn" class="kie-generate-button" type="button" aria-busy="false">
+            <span id="kieButtonSpinner" class="kie-button-spinner hidden" aria-hidden="true"></span>
+            <span id="kieButtonText">✨ สร้างด้วย Kie AI · GPT Image 2</span>
+          </button>
           <p id="kieGenerationStatus" class="kie-generation-status">GPT Image 2 · 2K · สร้างที่ 3:4 แล้วครอป PNG เป็น 1440 × 1800 อัตโนมัติ</p>
           <div class="upload-divider"><span>หรืออัปโหลดเอง</span></div>
           <label class="drop-zone" id="generatedDropZone">อัปโหลดหรือลากไฟล์โปสเตอร์มาวาง<input id="generatedImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label>
@@ -586,10 +589,14 @@
     function renderKieGeneration(donation) {
       const state = String(donation.kieTaskState || '').toLowerCase();
       const active = isActiveKieState(state);
+      const preparingOutput = state === 'success' && donation.generatedImageId && donation.kieOutputCropped !== 'true';
+      const loading = active || preparingOutput || kieCropDonationId === donation.id;
       const progressValue = Number(donation.kieTaskProgress);
       const progress = Number.isFinite(progressValue) && progressValue > 0 ? ` ${Math.min(progressValue, 100)}%` : '';
-      elements.generateKieBtn.disabled = !connectionOnline || active || Boolean(donation.facebookPostId) || donation.publishingStatus === 'published';
-      elements.generateKieBtn.textContent = active ? `⏳ GPT Image 2 กำลังสร้างภาพ${progress}` : donation.generatedImageId ? '✨ สร้างภาพใหม่ด้วย Kie AI · GPT Image 2' : '✨ สร้างด้วย Kie AI · GPT Image 2';
+      elements.generateKieBtn.disabled = !connectionOnline || loading || Boolean(donation.facebookPostId) || donation.publishingStatus === 'published';
+      elements.generateKieBtn.setAttribute('aria-busy', String(loading));
+      elements.kieButtonSpinner.classList.toggle('hidden', !loading);
+      elements.kieButtonText.textContent = active ? `GPT Image 2 กำลังสร้างภาพ${progress}` : preparingOutput ? 'กำลังจัดขนาดและบันทึกภาพ...' : donation.generatedImageId ? '✨ สร้างภาพใหม่ด้วย Kie AI · GPT Image 2' : '✨ สร้างด้วย Kie AI · GPT Image 2';
       elements.kieGenerationStatus.className = 'kie-generation-status';
       if (state === 'fail') {
         elements.kieGenerationStatus.textContent = `สร้างภาพไม่สำเร็จ: ${donation.kieTaskError || 'กรุณาลองอีกครั้ง'}`;
@@ -724,6 +731,9 @@
       if (kieCropDonationId || !currentDonation || currentDonation.id !== donationId || currentDonation.kieOutputCropped === 'true') return;
       kieCropDonationId = donationId;
       elements.generateKieBtn.disabled = true;
+      elements.generateKieBtn.setAttribute('aria-busy', 'true');
+      elements.kieButtonSpinner.classList.remove('hidden');
+      elements.kieButtonText.textContent = 'กำลังครอปและบันทึกภาพ...';
       elements.kieGenerationStatus.textContent = 'กำลังครอปกึ่งกลางเป็น 4:5 และบันทึก PNG ขนาด 1440 × 1800...';
       try {
         const file = await cropPosterToFacebookPng(currentDonation.generatedImageUrl, donationId);
@@ -738,9 +748,13 @@
           elements.kieGenerationStatus.textContent = `บันทึกภาพต้นฉบับ 3:4 แล้ว แต่ครอปอัตโนมัติไม่สำเร็จ: ${error.message}`;
           elements.kieGenerationStatus.className = 'kie-generation-status error';
           elements.generateKieBtn.disabled = false;
+          elements.generateKieBtn.setAttribute('aria-busy', 'false');
+          elements.kieButtonSpinner.classList.add('hidden');
+          elements.kieButtonText.textContent = '✨ สร้างภาพใหม่ด้วย Kie AI · GPT Image 2';
         }
       } finally {
         kieCropDonationId = '';
+        if (currentDonation && currentDonation.id === donationId && currentDonation.kieOutputCropped === 'true') renderKieGeneration(currentDonation);
       }
     }
 
@@ -784,7 +798,10 @@
       if (!currentDonation || isActiveKieState(currentDonation.kieTaskState)) return;
       if (!promptTemplate) return showToast('Prompt Template ยังโหลดไม่สำเร็จ', true);
       if (currentDonation.generatedImageId && !window.confirm('สร้างโปสเตอร์ใหม่ด้วย Kie AI และแทนที่โปสเตอร์ที่เชื่อมโยงอยู่หรือไม่?\n\nการสร้างภาพอาจใช้เครดิต Kie AI')) return;
-      setBusy(elements.generateKieBtn, true, 'กำลังส่งงานไป Kie AI...');
+      elements.generateKieBtn.disabled = true;
+      elements.generateKieBtn.setAttribute('aria-busy', 'true');
+      elements.kieButtonSpinner.classList.remove('hidden');
+      elements.kieButtonText.textContent = 'กำลังส่งงานไป Kie AI...';
       try {
         const generatedPrompt = buildPrompt(currentDonation);
         const result = await apiPost('startKieGeneration', { id: currentDonation.id, generatedPrompt });

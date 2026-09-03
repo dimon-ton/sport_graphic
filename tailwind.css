@@ -133,7 +133,8 @@
   .card-title h3 { @apply text-sm font-bold text-slate-800; }
   .poster-preview { @apply max-h-[480px] w-full rounded-xl bg-slate-100 object-contain; }
   .media-help { @apply mt-3 text-xs leading-relaxed text-slate-500; }
-  .kie-generate-button { @apply mt-3 w-full rounded-xl bg-gradient-to-r from-violet-700 to-fuchsia-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:from-violet-800 hover:to-fuchsia-700 disabled:cursor-not-allowed disabled:opacity-50; }
+  .kie-generate-button { @apply mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-700 to-fuchsia-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:from-violet-800 hover:to-fuchsia-700 disabled:cursor-not-allowed disabled:opacity-70; }
+  .kie-button-spinner { @apply h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white; }
   .kie-generation-status { @apply mt-2 text-center text-xs leading-relaxed text-slate-500; }
   .kie-generation-status.success { @apply text-emerald-700; }
   .kie-generation-status.error { @apply text-red-700; }
