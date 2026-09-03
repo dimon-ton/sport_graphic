@@ -131,6 +131,7 @@
   .card-title { @apply mb-3 flex flex-wrap items-center justify-between gap-2; }
   .card-title h3 { @apply text-sm font-bold text-slate-800; }
   .poster-preview { @apply max-h-[480px] w-full rounded-xl bg-slate-100 object-contain; }
+  .media-help { @apply mt-3 text-xs leading-relaxed text-slate-500; }
   .muted { @apply py-10 text-center text-xs text-slate-400; }
   .drop-zone { @apply mt-3 cursor-pointer rounded-xl border border-dashed border-violet-300 bg-violet-50 p-4 text-center text-xs text-violet-700; }
   .drop-zone input { @apply mt-2 border-0 bg-transparent p-0; }

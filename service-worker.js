@@ -1,11 +1,12 @@
 const CACHE_PREFIX = 'donation-manager-shell-';
-const CACHE_NAME = `${CACHE_PREFIX}v10`;
+const CACHE_NAME = `${CACHE_PREFIX}v11`;
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './prompt_template.txt',
   './prompt_styles.json',
+  './school_logo.png',
   './manifest.webmanifest',
   './icons/icon-180.png',
   './icons/icon-192.png',

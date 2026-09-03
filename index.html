@@ -169,6 +169,11 @@
       </article>
       <div class="media-grid">
         <article>
+          <div class="card-title"><h3>ตราสัญลักษณ์โรงเรียน (แนบทุกครั้ง)</h3><div><button id="copySchoolLogoBtn" class="text-button">คัดลอก</button><a id="openSchoolLogoBtn" class="text-button" href="school_logo.png" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div>
+          <img class="poster-preview" src="school_logo.png" alt="ตราสัญลักษณ์โรงเรียนบ้านโพนแท่น">
+          <p class="media-help">แนบภาพนี้พร้อม Prompt และภาพผู้บริจาค (ถ้ามี) เพื่อให้ AI ใช้ตราโรงเรียนที่ถูกต้อง</p>
+        </article>
+        <article>
           <div class="card-title"><h3>ภาพผู้บริจาค</h3><div><button id="copyDonorImageBtn" class="text-button">คัดลอก</button><a id="openDonorImageBtn" class="text-button" target="_blank" rel="noopener">เปิด/ดาวน์โหลด</a></div></div>
           <img id="detailOriginalImage" class="poster-preview hidden" alt="ภาพผู้บริจาค">
           <p id="noOriginalImage" class="muted">ยังไม่มีภาพผู้บริจาค สามารถเพิ่มภายหลังได้</p>
@@ -238,9 +243,9 @@
     const LEGACY_NO_DONOR_PORTRAIT_INSTRUCTION = 'No donor portrait was supplied. Do not invent a named person or recognizable identity.';
     const DONOR_PORTRAIT_DATA_LINE = '- Donor portrait: use the supplied portrait according to the identity-reference instruction above';
     const NO_DONOR_PORTRAIT_DATA_LINE = '- Donor portrait: none supplied; the poster must remain entirely person-free';
-    const DONOR_SPORTS_DAY_FIGURE_CUE = '- subtle silhouettes or graphic motifs of student athletes running, competing, or celebrating together';
+    const DONOR_SPORTS_DAY_FIGURE_CUE = '- small supporting groups of cheerful illustrated students in team-color sportswear, running or celebrating in the distant track and grandstands; keep them secondary to the photographic donor portrait and do not let them overlap the donor';
     const NO_DONOR_SPORTS_DAY_FIGURE_CUE = '- person-free sports graphics such as running-track curves, lane markings, team-color flags, trophies, medals, stadium lights, scoreless field geometry, and motion lines; never use human or human-like figures';
-    const DONOR_PORTRAIT_AREA_INSTRUCTION = 'Place the donor portrait prominently in the center. Preserve the donor’s real facial identity accurately. Do not alter facial structure, age, body proportions, hairstyle, or recognizable features. Professionally remove the original photo background and integrate the person naturally into the poster. Use flattering professional lighting, subtle edge lighting, natural skin texture, and realistic photographic detail. Do not make the person look illustrated, cartoonish, plastic, or AI-generated. Behind the donor, place an elegant symmetrical framing motif appropriate to the selected visual style, without covering the face or body. Use restrained glow, lighting, or tonal contrast appropriate to the selected visual style to separate the person from the background.';
+    const DONOR_PORTRAIT_AREA_INSTRUCTION = 'Place the donor portrait prominently in the center, replacing the central illustrated crowd or athlete focal point while leaving the school stadium, track, pennants, sports props, and celebratory background visible around it. Preserve the donor’s real facial identity accurately. Do not alter facial structure, age, body proportions, hairstyle, skin tone, or recognizable features. Professionally remove the original photo background and integrate the person naturally into the illustrated poster environment. Keep the donor fully photographic with flattering professional lighting, subtle edge lighting, natural skin texture, and realistic detail. Do not illustrate, cartoonize, beautify beyond recognition, or make the donor look plastic or AI-generated. Behind the donor, use a restrained gold victory arc, medal rim, or ribbon frame that does not cover the face or body and clearly separates the portrait from the colorful background.';
     const NO_DONOR_PORTRAIT_AREA_INSTRUCTION = 'Do not reserve or imitate a portrait area. Build the central focal point entirely from abstract, non-human school sports-day graphics: sweeping running-track lanes, coordinated team-color ribbons and flags, stadium-light arcs, a trophy, medal, laurel, or energetic geometric motion. Keep the donor name as the primary appreciation focus. Do not include any photographic panel, portrait-shaped placeholder, empty frame, person mockup, or human-like form.';
     const DONOR_PORTRAIT_COMPOSITION_ITEM = 'Donor portrait with a style-appropriate framing motif';
     const NO_DONOR_PORTRAIT_COMPOSITION_ITEM = 'Person-free abstract school sports-day focal graphic';
@@ -624,6 +629,7 @@
     });
     elements.copyPromptBtn.addEventListener('click', () => copyText(elements.detailPrompt.value, 'คัดลอก Prompt แล้ว'));
     elements.copyCaptionBtn.addEventListener('click', () => copyText(elements.detailCaption.value, 'คัดลอกแคปชันแล้ว'));
+    elements.copySchoolLogoBtn.addEventListener('click', () => copyImage('school_logo.png'));
     elements.copyDonorImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.donorImageUrl));
     elements.copyGeneratedImageBtn.addEventListener('click', () => copyImage(currentDonation && currentDonation.generatedImageUrl));
 

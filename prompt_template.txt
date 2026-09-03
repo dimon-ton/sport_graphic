@@ -13,7 +13,57 @@ do not let luxury, gala, corporate, academic, celestial, floral, heritage, or
 festival styling replace the school sports-day atmosphere. Do not depict a
 professional league, professional team, or one specific sport as the sole theme.
 
+REFERENCE-IMAGE ART DIRECTION — DOMINANT COMPOSITION:
+
+Match the visual character of a cheerful illustrated Thai school sports-day
+announcement poster. Use a bright cyan-to-sky-blue upper background with soft
+white clouds, strings of small triangular team-color pennants across the top,
+and a school running track receding toward the center between two lively
+grandstands. Use colorful polished 2.5D digital illustration for the stadium,
+sports equipment, trophies, medals, ribbons, and permitted background figures.
+
+Build the poster in clear centered horizontal tiers like the reference:
+
+- compact school identity at the top with open sky around it
+- very large centered school name and thank-you message in bold Thai display type
+- donor name on a clean, high-contrast white name band
+- event/supporting sentence centered over the stadium and running-track scene
+- the portrait focal area when a donor portrait is supplied
+- a prominent gold medal or championship-seal donation badge
+- bank and account information in a strong lower information block
+- tax message in a rounded white footer capsule
+- deep crimson-red ribbon panels, gold trim, and multicolor curled ribbons
+  framing the bottom edge
+
+Typography should resemble a professionally typeset Thai event poster: bold,
+friendly, condensed display lettering, primarily white or black with thick
+contrasting outlines and restrained drop shadows. Keep every required Thai line
+easy to read at phone-screen size. Do not copy any logo, seal, text, donor name,
+amount, or other factual content from the reference image; use only the exact
+content authorized below.
+
+When a donor portrait is supplied, retain the illustrated reference style for
+the environment and decorations, but keep the donor itself fully photographic,
+identity-accurate, and natural. The portrait replaces the central crowd/athlete
+focal point rather than being redrawn as an illustration. Never stylize, cartoon,
+beautify beyond recognition, or alter the donor's face.
+
 [PORTRAIT_INSTRUCTION]
+
+SCHOOL LOGO REFERENCE — REQUIRED:
+
+An official school-logo image is supplied as a separate image reference. It is
+the circular white emblem with the Thai school name around the rim and the
+colored Thai education crest in the center. Use that supplied logo exactly once
+near the top center of the poster, above the school-name heading, at a modest
+size with clear space around it. Treat it as a placed image asset: preserve its
+round shape, colors, proportions, crest, and all Thai lettering exactly. Do not
+redraw, reinterpret, crop, recolor, simplify, replace, or generate a look-alike.
+Do not extract the center crest and do not invent any additional logo or seal.
+
+When both reference images are supplied, the circular emblem is the SCHOOL LOGO
+and the photograph of a person is the DONOR PORTRAIT. Never merge them, swap
+their roles, place the donor inside the logo, or use the logo as a portrait frame.
 
 Treat every instruction below as the complete design brief and build the full
 composition directly from it.
@@ -141,7 +191,11 @@ these design instructions as text on the poster.
 SCHOOL SPORTS-DAY DESIGN DETAILS:
 
 The selected visual style controls palette, texture, lighting, and graphic
-treatment only. School sports-day identity always controls the subject matter.
+treatment only. The REFERENCE-IMAGE ART DIRECTION controls the overall layout,
+illustrated Thai school-sports character, typography hierarchy, sky-and-stadium
+setting, gold donation badge, and red ribbon footer. If the selected visual style
+conflicts with that reference direction, preserve the reference composition and
+apply the selected style only as a subtle surface treatment.
 
 Integrate clear but tasteful school sports-day visual cues throughout the
 composition. Use several of the following as supporting design elements:
@@ -176,24 +230,27 @@ CENTRAL VISUAL AREA:
 
 [PORTRAIT_AREA_INSTRUCTION]
 
-DONATION DETAIL CARD:
+DONATION DETAIL BADGE AND BANK BLOCK:
 
-Create a large premium light-toned information card across the lower-middle
-section. Its shape, border, and finish should follow the selected visual style,
-while retaining excellent contrast and generous internal spacing.
+Create a large circular gold medal or championship-seal badge in the
+lower-middle section, centered over the running track. Use a dimensional gold
+rim, subtle laurel detailing, a warm ivory center, and short red ribbon tails.
+It must feel celebratory and school-appropriate, not military or corporate.
 
-Inside the card, follow DONATION TYPE HANDLING and the STRICT DONATION DETAIL
+Inside the badge, follow DONATION TYPE HANDLING and the STRICT DONATION DETAIL
 RULE. Render only the selected Thai label and the immutable Donation detail.
 Never render Donation type itself.
 
 Place the donation detail very large, bold, and black in the center.
 
-The donation detail should be the strongest visual element inside the card.
+The donation detail should be the strongest visual element inside the badge.
 
-Add a subtle horizontal dashed divider line underneath.
+Place the bank information immediately below the badge in a clean,
+high-contrast lower information block over the deep crimson-red base. A thin
+gold or white divider may separate the badge and bank block.
 
-Below the divider, place Bank information from FIXED SCHOOL INFORMATION and
-Account name underneath it. Show the full account number exactly as written.
+Place Bank information from FIXED SCHOOL INFORMATION and Account name underneath
+it. Show the full account number exactly as written.
 Never mask, shorten, replace, or redact any digits.
 
 Make the school/account-name line slightly bolder.
@@ -204,10 +261,12 @@ Place the footer statement prominently below the white card:
 
 Use Footer message from FIXED SCHOOL INFORMATION exactly.
 
-Use bold white Thai typography.
+Use bold dark Thai typography inside the white capsule.
 
-Finish the bottom edge with a polished decorative treatment that follows the
-selected visual style and maintains the school sports-day visual language.
+Place the footer statement inside a rounded white capsule with dark Thai text
+for maximum readability. Finish the bottom edge with deep crimson ribbon panels,
+thin gold trim, small Thai-flag accents, and curled red, blue, green, and yellow
+ribbons. Keep these decorative elements clear of all required text.
 
 COMPOSITION:
 
