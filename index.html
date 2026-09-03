@@ -736,7 +736,7 @@
       elements.kieButtonText.textContent = 'กำลังครอปและบันทึกภาพ...';
       elements.kieGenerationStatus.textContent = 'กำลังครอปกึ่งกลางเป็น 4:5 และบันทึก PNG ขนาด 1440 × 1800...';
       try {
-        const file = await cropPosterToFacebookPng(currentDonation.generatedImageUrl, donationId);
+        const file = await cropPosterToFacebookPng(currentDonation.kieSourceImageUrl || currentDonation.generatedImageUrl, donationId);
         const result = await apiPost('uploadImage', { donationId, imageKind: 'generated', kieCrop: true, ...await filePayload(file) });
         if (!currentDonation || currentDonation.id !== donationId) return;
         currentDonation = result.donation;

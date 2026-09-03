@@ -16,7 +16,7 @@ const DONATION_HEADERS = [
   'generatedPrompt', 'caption', 'facebookPostId', 'facebookPostUrl',
   'facebookPublishedAt', 'publishingStatus', 'notes', 'requestId',
   'kieTaskId', 'kieTaskState', 'kieTaskProgress', 'kieTaskError', 'kieTaskUpdatedAt',
-  'kieOutputCropped'
+  'kieOutputCropped', 'kieSourceImageUrl'
 ];
 
 function doGet(event) {
@@ -206,8 +206,7 @@ function startKieGeneration_(payload) {
       prompt: generationPrompt,
       input_urls: imageInputs,
       aspect_ratio: properties.getProperty('KIE_IMAGE_ASPECT_RATIO') || '3:4',
-      resolution: properties.getProperty('KIE_IMAGE_RESOLUTION') || '2K',
-      background: 'opaque'
+      resolution: properties.getProperty('KIE_IMAGE_RESOLUTION') || '2K'
     }
   };
   const response = kieRequest_('/jobs/createTask', {
@@ -222,6 +221,7 @@ function startKieGeneration_(payload) {
     record.kieTaskError = '';
     record.kieTaskUpdatedAt = new Date().toISOString();
     record.kieOutputCropped = '';
+    record.kieSourceImageUrl = '';
     record.generatedPrompt = generationPrompt;
     return record;
   });
@@ -232,7 +232,21 @@ function checkKieGeneration_(payload) {
   const donation = getDonationById_(donationId);
   const taskId = requiredString_(donation.kieTaskId, 'kieTaskId');
   if (donation.kieTaskState === 'success' && donation.generatedImageId) {
-    return { success: true, donation: donation, complete: true };
+    if (donation.kieSourceImageUrl) {
+      return { success: true, donation: donation, complete: true };
+    }
+    const completedResponse = kieRequest_('/jobs/recordInfo?taskId=' + encodeURIComponent(taskId), { method: 'get' });
+    const completedTask = completedResponse.data || {};
+    const completedResult = parseKieResult_(completedTask.resultJson);
+    const completedResultUrl = completedResult.resultUrls && completedResult.resultUrls[0];
+    if (!completedResultUrl) throw new Error('Kie AI completed without an image URL.');
+    const recovered = mutateDonation_(donationId, function (record) {
+      ensureCurrentKieTask_(record, taskId);
+      record.kieSourceImageUrl = completedResultUrl;
+      return record;
+    });
+    recovered.complete = true;
+    return recovered;
   }
   const response = kieRequest_('/jobs/recordInfo?taskId=' + encodeURIComponent(taskId), { method: 'get' });
   const task = response.data || {};
@@ -283,6 +297,7 @@ function checkKieGeneration_(payload) {
       record.kieTaskError = '';
       record.kieTaskUpdatedAt = new Date().toISOString();
       record.kieOutputCropped = '';
+      record.kieSourceImageUrl = resultUrl;
       record.publishingStatus = 'draft';
       return record;
     });
@@ -333,6 +348,7 @@ function clearKieTask_(donation) {
   donation.kieTaskError = '';
   donation.kieTaskUpdatedAt = '';
   donation.kieOutputCropped = '';
+  donation.kieSourceImageUrl = '';
 }
 
 function publishFacebook_(payload) {
