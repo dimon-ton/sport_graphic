@@ -4,7 +4,7 @@
 
 - `index.html` is the single-page Thai donor appreciation interface. Its inline JavaScript manages form state, browser storage, JSONP/iframe API requests, donation editing, prompt interpolation, PWA installation, and offline UI guards.
 - `styles.css` is the committed, browser-ready Tailwind CSS bundle. Edit `tailwind.css` and `tailwind.config.cjs`, then regenerate the bundle when changing utility styles.
-- `Code.js` is the Google Apps Script web-app backend. It performs authenticated donation CRUD in the active spreadsheet, stores images in Google Drive, and publishes approved images to Facebook.
+- `Code.js` is the Google Apps Script web-app backend. It performs authenticated donation CRUD, starts and checks Kie AI image tasks, stores images in Google Drive, and publishes approved images to Facebook.
 - `appsscript.json` contains Apps Script runtime and web-app settings.
 - `prompt_template.txt` is the approved school sports-day image-generation prompt. Keep its fixed Thai school, event, banking, account, and tax text intact; only marked placeholders are variable.
 - `prompt_styles.json` contains exactly 20 sports-day-first visual variants. Each entry must retain a unique `name` and a non-empty `direction` while remaining compatible with portrait and person-free modes.
@@ -26,13 +26,13 @@ Use two-space indentation in HTML, CSS, and JavaScript. Keep browser code in `in
 
 Preserve Thai copy exactly where it represents school, event, donation labels, account, or tax information. Keep the no-image prompt strictly person-free: no people, silhouettes, crowds, avatars, mockups, or portrait placeholders. When core donor data changes, regenerate the prompt and caption; unpublished generated-poster associations must be invalidated so stale artwork cannot be published.
 
-Do not put secrets in frontend code, local-storage defaults, URLs, or committed files. `ADMIN_ACCESS_KEY`, `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_ACCESS_TOKEN`, and optional `FACEBOOK_GRAPH_API_VERSION` are Apps Script Properties. The administrator key is stored only in `sessionStorage` at runtime.
+Do not put secrets in frontend source code, local-storage defaults, URLs, spreadsheets, or committed files. `ADMIN_ACCESS_KEY`, `KIE_API_KEY`, `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_ACCESS_TOKEN`, and optional provider settings may be Apps Script Properties. The administrator key and an optional frontend-supplied Facebook Page token are stored only in `sessionStorage` at runtime; the Page token is sent only in the authenticated publish POST body.
 
 ## Testing Guidelines
 
 Before committing, manually test prompt/template loading, all 20 style records, form validation, image preview, history/search/filtering, detail loading, donor-data editing, poster invalidation, copy buttons, and successful/error API responses. Test prompt generation both with a supplied portrait and without one; the latter must remain entirely person-free.
 
-For PWA changes, verify manifest/icon paths, service-worker registration, the expected app-shell cache, offline reload, disabled server actions while offline, and recovery after reconnection. For backend changes, deploy to a safe Apps Script version and verify create/update/delete operations against the `Donations` sheet, Drive upload behavior, and Facebook publishing on a test Page without logging secrets.
+For PWA changes, verify manifest/icon paths, service-worker registration, the expected app-shell cache, offline reload, disabled server actions while offline, and recovery after reconnection. For backend changes, deploy to a safe Apps Script version and verify create/update/delete operations against the `Donations` sheet, Kie AI task polling and final 1440 × 1800 crop, Drive upload behavior, and Facebook publishing on a test Page without logging secrets.
 
 ## Commit & Pull Request Guidelines
 

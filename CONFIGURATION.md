@@ -46,6 +46,36 @@ Uploads are limited to JPEG, PNG, WebP, and GIF. Drive files are shared as
 photos must remain private, this deployment model needs an authenticated image
 proxy before use.
 
+## Kie AI poster generation
+
+The generated-poster card can submit the saved prompt directly to Kie AI. The
+Apps Script backend creates an asynchronous GPT Image 2 task, while the browser
+polls its status with increasing delays. When generation finishes, Apps Script
+immediately downloads the temporary provider result into Google Drive. The
+browser then center-crops the 3:4 source and saves a PNG at exactly 1440 × 1800
+pixels (4:5) back to the same donation record.
+
+Set these values in **Apps Script > Project settings > Script properties**:
+
+| Property | Value |
+| --- | --- |
+| `KIE_API_KEY` | Required Kie AI API key; keep it server-side |
+| `KIE_SCHOOL_LOGO_URL` | Recommended public HTTPS URL for `school_logo.png` on the production static host |
+| `KIE_IMAGE_MODEL` | Optional; defaults to `gpt-image-2-image-to-image` |
+| `KIE_IMAGE_ASPECT_RATIO` | Optional; defaults to `3:4` |
+| `KIE_IMAGE_RESOLUTION` | Optional; defaults to `2K` |
+
+The school logo is always the first image reference and the donor portrait, when
+present, is the second. GPT Image 2 at 2K does not support 4:5 through Kie AI,
+so the default uses 3:4 with a centered crop-safe composition. Keep the browser
+record dialog open until the final 1440 × 1800 PNG is saved. If it is closed,
+reopen the record later; polling and final cropping resume from the task state
+stored in the `Donations` sheet.
+
+For local development, set `KIE_SCHOOL_LOGO_URL` because a localhost logo URL is
+not reachable by Kie AI. Do not place `KIE_API_KEY` in `index.html`, local
+storage, URLs, the spreadsheet, or committed files.
+
 ## Facebook Page publishing
 
 Set these values in **Apps Script > Project settings > Script properties**:
@@ -57,11 +87,15 @@ Set these values in **Apps Script > Project settings > Script properties**:
 | `FACEBOOK_PAGE_ACCESS_TOKEN` | Page access token with permission to publish Page posts |
 | `FACEBOOK_GRAPH_API_VERSION` | Optional pinned version, currently `v26.0` by default |
 
-Never put the Page token in `index.html`, a spreadsheet cell, or a committed
-file. `.env.example` documents property names only and is not loaded by the app.
-Enter `ADMIN_ACCESS_KEY` in the page's administrator field. It is kept in
-`sessionStorage`, cleared when the browser session ends, and sent in POST bodies
-rather than query strings. Use HTTPS and do not share this key.
+The settings card also accepts a Facebook Page access token for the current
+browser session. It is masked, kept in `sessionStorage`, cleared when the browser
+session ends, and sent only in the authenticated `publishFacebook` POST body.
+When that field is blank, the backend falls back to
+`FACEBOOK_PAGE_ACCESS_TOKEN` in Script Properties. Never place the token in
+source code, local storage, a URL, a spreadsheet cell, or a committed file.
+`.env.example` documents property names only and is not loaded by the app.
+Enter `ADMIN_ACCESS_KEY` in the page's administrator field; it follows the same
+session-only storage model. Use HTTPS and do not share either credential.
 
 The backend uploads the Drive blob with a caption to the official Page Photos
 edge, `POST /{page-id}/photos`, and records the returned photo/post ID. The Page

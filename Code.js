@@ -1,16 +1,21 @@
 /* Google Apps Script backend for the donation content manager.
- * Script Properties: ADMIN_ACCESS_KEY, FACEBOOK_PAGE_ID, FACEBOOK_PAGE_ACCESS_TOKEN and
- * optional FACEBOOK_GRAPH_API_VERSION (defaults to v26.0).
+ * Script Properties: ADMIN_ACCESS_KEY, KIE_API_KEY, FACEBOOK_PAGE_ID,
+ * FACEBOOK_PAGE_ACCESS_TOKEN and optional provider settings documented in
+ * CONFIGURATION.md.
  */
 const DONATIONS_TAB = 'Donations';
 const DONOR_IMAGES_FOLDER = 'Donation Donor Images';
 const GENERATED_IMAGES_FOLDER = 'Donation Generated Images';
 const DEFAULT_GRAPH_API_VERSION = 'v26.0';
+const KIE_API_BASE_URL = 'https://api.kie.ai/api/v1';
+const DEFAULT_KIE_MODEL = 'gpt-image-2-image-to-image';
 const DONATION_HEADERS = [
   'id', 'createdAt', 'updatedAt', 'donorName', 'donationType', 'donationDetail',
   'donorImageUrl', 'donorImageId', 'generatedImageUrl', 'generatedImageId',
   'generatedPrompt', 'caption', 'facebookPostId', 'facebookPostUrl',
-  'facebookPublishedAt', 'publishingStatus', 'notes', 'requestId'
+  'facebookPublishedAt', 'publishingStatus', 'notes', 'requestId',
+  'kieTaskId', 'kieTaskState', 'kieTaskProgress', 'kieTaskError', 'kieTaskUpdatedAt',
+  'kieOutputCropped'
 ];
 
 function doGet(event) {
@@ -48,6 +53,8 @@ function route_(payload) {
   if (action === 'updateDonation') return updateDonation_(payload);
   if (action === 'deleteDonation') return deleteDonation_(payload.id);
   if (action === 'uploadImage') return uploadImage_(payload);
+  if (action === 'startKieGeneration') return startKieGeneration_(payload);
+  if (action === 'checkKieGeneration') return checkKieGeneration_(payload);
   if (action === 'publishFacebook') return publishFacebook_(payload);
   throw new Error('Unknown action.');
 }
@@ -114,6 +121,7 @@ function updateDonation_(payload) {
     if (contentChanged && donation.publishingStatus !== 'published') {
       donation.generatedImageId = '';
       donation.generatedImageUrl = '';
+      clearKieTask_(donation);
       donation.publishingStatus = 'draft';
     } else if (donation.publishingStatus !== 'published' && donation.publishingStatus !== 'publishing') {
       donation.publishingStatus = donation.generatedImageId && String(donation.caption || '').trim() ? 'ready' : 'draft';
@@ -145,6 +153,11 @@ function uploadImage_(payload) {
       if (imageKind === 'generated') {
         donation.generatedImageId = file.getId();
         donation.generatedImageUrl = imageUrl;
+        if (String(payload.kieCrop || '') === 'true' && donation.kieTaskState === 'success') {
+          donation.kieOutputCropped = 'true';
+        } else {
+          clearKieTask_(donation);
+        }
         donation.publishingStatus = donation.caption ? 'ready' : 'draft';
       } else {
         donation.donorImageId = file.getId();
@@ -164,6 +177,163 @@ function uploadImage_(payload) {
   }
 }
 
+function startKieGeneration_(payload) {
+  const donationId = requiredString_(payload.id, 'id');
+  const donation = getDonationById_(donationId);
+  if (donation.facebookPostId || donation.publishingStatus === 'published') {
+    throw new Error('Cannot replace a poster after it has been published.');
+  }
+  if (isActiveKieState_(donation.kieTaskState) && donation.kieTaskId) {
+    return { success: true, donation: donation, taskId: donation.kieTaskId, duplicate: true };
+  }
+
+  const properties = PropertiesService.getScriptProperties();
+  const apiKey = properties.getProperty('KIE_API_KEY');
+  if (!apiKey) throw new Error('KIE_API_KEY is not configured in Script Properties.');
+  const logoUrl = properties.getProperty('KIE_SCHOOL_LOGO_URL') || String(payload.schoolLogoUrl || '');
+  if (!/^https:\/\//i.test(logoUrl)) {
+    throw new Error('The school logo must have a public HTTPS URL. Configure KIE_SCHOOL_LOGO_URL for this deployment.');
+  }
+  const imageInputs = [logoUrl];
+  if (donation.donorImageUrl) imageInputs.push(donation.donorImageUrl);
+  const generationPrompt = Object.prototype.hasOwnProperty.call(payload, 'generatedPrompt')
+    ? requiredLiteral_(payload.generatedPrompt, 'generatedPrompt')
+    : requiredLiteral_(donation.generatedPrompt, 'generatedPrompt');
+  const requestBody = {
+    model: properties.getProperty('KIE_IMAGE_MODEL') || DEFAULT_KIE_MODEL,
+    input: {
+      prompt: generationPrompt,
+      input_urls: imageInputs,
+      aspect_ratio: properties.getProperty('KIE_IMAGE_ASPECT_RATIO') || '3:4',
+      resolution: properties.getProperty('KIE_IMAGE_RESOLUTION') || '2K',
+      background: 'opaque'
+    }
+  };
+  const response = kieRequest_('/jobs/createTask', {
+    method: 'post', contentType: 'application/json', payload: JSON.stringify(requestBody)
+  });
+  const taskId = response.data && response.data.taskId;
+  if (!taskId) throw new Error('Kie AI returned no task ID.');
+  return mutateDonation_(donationId, function (record) {
+    record.kieTaskId = String(taskId);
+    record.kieTaskState = 'waiting';
+    record.kieTaskProgress = '0';
+    record.kieTaskError = '';
+    record.kieTaskUpdatedAt = new Date().toISOString();
+    record.kieOutputCropped = '';
+    record.generatedPrompt = generationPrompt;
+    return record;
+  });
+}
+
+function checkKieGeneration_(payload) {
+  const donationId = requiredString_(payload.id, 'id');
+  const donation = getDonationById_(donationId);
+  const taskId = requiredString_(donation.kieTaskId, 'kieTaskId');
+  if (donation.kieTaskState === 'success' && donation.generatedImageId) {
+    return { success: true, donation: donation, complete: true };
+  }
+  const response = kieRequest_('/jobs/recordInfo?taskId=' + encodeURIComponent(taskId), { method: 'get' });
+  const task = response.data || {};
+  const state = String(task.state || 'waiting').toLowerCase();
+  if (state === 'fail') {
+    return mutateDonation_(donationId, function (record) {
+      ensureCurrentKieTask_(record, taskId);
+      record.kieTaskState = 'fail';
+      record.kieTaskProgress = String(task.progress || '');
+      record.kieTaskError = String(task.failMsg || task.failCode || 'Kie AI image generation failed.');
+      record.kieTaskUpdatedAt = new Date().toISOString();
+      record.kieOutputCropped = '';
+      return record;
+    });
+  }
+  if (state !== 'success') {
+    return mutateDonation_(donationId, function (record) {
+      ensureCurrentKieTask_(record, taskId);
+      record.kieTaskState = isActiveKieState_(state) ? state : 'waiting';
+      record.kieTaskProgress = String(task.progress || '');
+      record.kieTaskError = '';
+      record.kieTaskUpdatedAt = new Date().toISOString();
+      record.kieOutputCropped = '';
+      return record;
+    });
+  }
+
+  const result = parseKieResult_(task.resultJson);
+  const resultUrl = result.resultUrls && result.resultUrls[0];
+  if (!resultUrl) throw new Error('Kie AI completed without an image URL.');
+  const imageResponse = UrlFetchApp.fetch(resultUrl, { muteHttpExceptions: true });
+  if (imageResponse.getResponseCode() >= 300) throw new Error('Could not download the generated Kie AI image.');
+  const blob = imageResponse.getBlob();
+  const contentType = String(blob.getContentType() || '').toLowerCase();
+  if (contentType.indexOf('image/') !== 0) throw new Error('Kie AI returned a non-image result.');
+  const extension = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg';
+  blob.setName('kie-source-' + sanitizeFileName_(donationId) + '.' + extension);
+  if (blob.getBytes().length > 20 * 1024 * 1024) throw new Error('The generated Kie AI image is larger than 20 MB.');
+  const file = getImageFolder_('generated').createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  try {
+    const resultRecord = mutateDonation_(donationId, function (record) {
+      ensureCurrentKieTask_(record, taskId);
+      record.generatedImageId = file.getId();
+      record.generatedImageUrl = driveImageUrl_(file.getId());
+      record.kieTaskState = 'success';
+      record.kieTaskProgress = '100';
+      record.kieTaskError = '';
+      record.kieTaskUpdatedAt = new Date().toISOString();
+      record.kieOutputCropped = '';
+      record.publishingStatus = 'draft';
+      return record;
+    });
+    resultRecord.complete = true;
+    return resultRecord;
+  } catch (error) {
+    file.setTrashed(true);
+    throw error;
+  }
+}
+
+function kieRequest_(path, options) {
+  const apiKey = PropertiesService.getScriptProperties().getProperty('KIE_API_KEY');
+  if (!apiKey) throw new Error('KIE_API_KEY is not configured in Script Properties.');
+  const requestOptions = Object.assign({}, options || {}, {
+    headers: { Authorization: 'Bearer ' + apiKey }, muteHttpExceptions: true
+  });
+  const response = UrlFetchApp.fetch(KIE_API_BASE_URL + path, requestOptions);
+  let body;
+  try { body = JSON.parse(response.getContentText() || '{}'); }
+  catch (error) { throw new Error('Kie AI returned an invalid response.'); }
+  if (response.getResponseCode() >= 300 || Number(body.code) !== 200) {
+    throw new Error(String(body.msg || body.message || 'Kie AI request failed.'));
+  }
+  return body;
+}
+
+function parseKieResult_(value) {
+  if (value && typeof value === 'object') return value;
+  try { return JSON.parse(String(value || '{}')); }
+  catch (error) { throw new Error('Kie AI returned invalid image result data.'); }
+}
+
+function isActiveKieState_(state) {
+  return ['waiting', 'queuing', 'generating'].indexOf(String(state || '').toLowerCase()) !== -1;
+}
+
+function ensureCurrentKieTask_(donation, taskId) {
+  if (String(donation.kieTaskId || '') !== String(taskId)) {
+    throw new Error('A newer Kie AI generation task has replaced this task.');
+  }
+}
+
+function clearKieTask_(donation) {
+  donation.kieTaskId = '';
+  donation.kieTaskState = '';
+  donation.kieTaskProgress = '';
+  donation.kieTaskError = '';
+  donation.kieTaskUpdatedAt = '';
+  donation.kieOutputCropped = '';
+}
+
 function publishFacebook_(payload) {
   const id = requiredString_(payload.id, 'id');
   const existing = getDonationById_(id);
@@ -175,13 +345,17 @@ function publishFacebook_(payload) {
       throw new Error('This donation has already been published.');
     }
     if (donation.publishingStatus === 'publishing') throw new Error('This donation is already being published.');
+    if (isActiveKieState_(donation.kieTaskState)) throw new Error('Kie AI is still generating this poster.');
+    if (donation.kieTaskId && donation.kieTaskState === 'success' && donation.kieOutputCropped !== 'true') {
+      throw new Error('Wait for the Kie AI poster to be cropped to 1440 x 1800 before publishing.');
+    }
     if (!donation.generatedImageId) throw new Error('A generated image is required before publishing.');
     if (!String(donation.caption || '').trim()) throw new Error('A caption is required before publishing.');
     donation.publishingStatus = 'publishing';
     return donation;
   }).donation;
   try {
-    const result = publishPhotoToFacebook_(claimed);
+    const result = publishPhotoToFacebook_(claimed, payload.facebookPageAccessToken);
     const postId = String(result.post_id || result.id || '');
     return setDonationFields_(id, {
       facebookPostId: postId,
@@ -197,10 +371,10 @@ function publishFacebook_(payload) {
 }
 
 // Isolated Facebook service. Page Photos accepts an image source and message.
-function publishPhotoToFacebook_(donation) {
+function publishPhotoToFacebook_(donation, suppliedAccessToken) {
   const properties = PropertiesService.getScriptProperties();
   const pageId = properties.getProperty('FACEBOOK_PAGE_ID');
-  const accessToken = properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN');
+  const accessToken = String(suppliedAccessToken || '').trim() || properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN');
   const version = properties.getProperty('FACEBOOK_GRAPH_API_VERSION') || DEFAULT_GRAPH_API_VERSION;
   if (!pageId || !accessToken) throw new Error('Facebook Page configuration is incomplete.');
   const response = UrlFetchApp.fetch(
