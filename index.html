@@ -736,6 +736,11 @@
       elements.kieButtonText.textContent = 'กำลังครอปและบันทึกภาพ...';
       elements.kieGenerationStatus.textContent = 'กำลังครอปกึ่งกลางเป็น 4:5 และบันทึก PNG ขนาด 1440 × 1800...';
       try {
+        if (!currentDonation.kieSourceImageUrl && currentDonation.kieTaskId) {
+          const taskResult = await apiPost('checkKieGeneration', { id: donationId });
+          if (!currentDonation || currentDonation.id !== donationId) return;
+          currentDonation = taskResult.donation;
+        }
         const file = await cropPosterToFacebookPng(currentDonation.kieSourceImageUrl || currentDonation.generatedImageUrl, donationId);
         const result = await apiPost('uploadImage', { donationId, imageKind: 'generated', kieCrop: true, ...await filePayload(file) });
         if (!currentDonation || currentDonation.id !== donationId) return;
