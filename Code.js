@@ -9,6 +9,7 @@ const GENERATED_IMAGES_FOLDER = 'Donation Generated Images';
 const DEFAULT_GRAPH_API_VERSION = 'v26.0';
 const KIE_API_BASE_URL = 'https://api.kie.ai/api/v1';
 const DEFAULT_KIE_MODEL = 'gpt-image-2-image-to-image';
+const DEFAULT_SCHOOL_LOGO_URL = 'https://raw.githubusercontent.com/dimon-ton/sport_graphic/main/school_logo.png';
 const DONATION_HEADERS = [
   'id', 'createdAt', 'updatedAt', 'donorName', 'donationType', 'donationDetail',
   'donorImageUrl', 'donorImageId', 'generatedImageUrl', 'generatedImageId',
@@ -190,9 +191,9 @@ function startKieGeneration_(payload) {
   const properties = PropertiesService.getScriptProperties();
   const apiKey = properties.getProperty('KIE_API_KEY');
   if (!apiKey) throw new Error('KIE_API_KEY is not configured in Script Properties.');
-  const logoUrl = properties.getProperty('KIE_SCHOOL_LOGO_URL') || String(payload.schoolLogoUrl || '');
+  const logoUrl = properties.getProperty('KIE_SCHOOL_LOGO_URL') || DEFAULT_SCHOOL_LOGO_URL;
   if (!/^https:\/\//i.test(logoUrl)) {
-    throw new Error('The school logo must have a public HTTPS URL. Configure KIE_SCHOOL_LOGO_URL for this deployment.');
+    throw new Error('The school logo must have a public HTTPS URL.');
   }
   const imageInputs = [logoUrl];
   if (donation.donorImageUrl) imageInputs.push(donation.donorImageUrl);

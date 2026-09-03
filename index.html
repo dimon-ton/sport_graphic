@@ -786,9 +786,8 @@
       if (currentDonation.generatedImageId && !window.confirm('สร้างโปสเตอร์ใหม่ด้วย Kie AI และแทนที่โปสเตอร์ที่เชื่อมโยงอยู่หรือไม่?\n\nการสร้างภาพอาจใช้เครดิต Kie AI')) return;
       setBusy(elements.generateKieBtn, true, 'กำลังส่งงานไป Kie AI...');
       try {
-        const schoolLogoUrl = new URL('school_logo.png', window.location.href).href;
         const generatedPrompt = buildPrompt(currentDonation);
-        const result = await apiPost('startKieGeneration', { id: currentDonation.id, schoolLogoUrl, generatedPrompt });
+        const result = await apiPost('startKieGeneration', { id: currentDonation.id, generatedPrompt });
         currentDonation = result.donation;
         renderDetail();
         startKiePolling(currentDonation.id, 3000);

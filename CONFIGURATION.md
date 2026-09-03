@@ -60,21 +60,23 @@ Set these values in **Apps Script > Project settings > Script properties**:
 | Property | Value |
 | --- | --- |
 | `KIE_API_KEY` | Required Kie AI API key; keep it server-side |
-| `KIE_SCHOOL_LOGO_URL` | Recommended public HTTPS URL for `school_logo.png` on the production static host |
+| `KIE_SCHOOL_LOGO_URL` | Optional public HTTPS override; defaults to the committed GitHub `school_logo.png` |
 | `KIE_IMAGE_MODEL` | Optional; defaults to `gpt-image-2-image-to-image` |
 | `KIE_IMAGE_ASPECT_RATIO` | Optional; defaults to `3:4` |
 | `KIE_IMAGE_RESOLUTION` | Optional; defaults to `2K` |
 
-The school logo is always the first image reference and the donor portrait, when
-present, is the second. GPT Image 2 at 2K does not support 4:5 through Kie AI,
+The school logo at
+`https://raw.githubusercontent.com/dimon-ton/sport_graphic/main/school_logo.png`
+is always the first image reference; `KIE_SCHOOL_LOGO_URL` may override it. The
+donor portrait, when present, is the second reference. GPT Image 2 at 2K does not support 4:5 through Kie AI,
 so the default uses 3:4 with a centered crop-safe composition. Keep the browser
 record dialog open until the final 1440 × 1800 PNG is saved. If it is closed,
 reopen the record later; polling and final cropping resume from the task state
 stored in the `Donations` sheet.
 
-For local development, set `KIE_SCHOOL_LOGO_URL` because a localhost logo URL is
-not reachable by Kie AI. Do not place `KIE_API_KEY` in `index.html`, local
-storage, URLs, the spreadsheet, or committed files.
+The GitHub default also works during local development because Kie AI can reach
+it over HTTPS. Do not place `KIE_API_KEY` in `index.html`, local storage, URLs,
+the spreadsheet, or committed files.
 
 ## Facebook Page publishing
 
