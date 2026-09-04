@@ -284,7 +284,7 @@ function checkKieGeneration_(payload) {
   if (contentType.indexOf('image/') !== 0) throw new Error('Kie AI returned a non-image result.');
   const extension = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg';
   blob.setName('kie-source-' + sanitizeFileName_(donationId) + '.' + extension);
-  if (blob.getBytes().length > 20 * 1024 * 1024) throw new Error('The generated Kie AI image is larger than 20 MB.');
+  if (blob.getBytes().length > 10 * 1024 * 1024) throw new Error('The generated Kie AI image is larger than 10 MB (Facebook upload limit).');
   const file = getImageFolder_('generated').createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   try {
@@ -371,11 +371,13 @@ function publishFacebook_(payload) {
   try {
     const result = publishPhotoToFacebook_(claimed, payload.facebookPageAccessToken);
     const postId = String(result.post_id || result.id || '');
+    const parts = String(result.post_id || '').split('_');
+    const postUrl = (parts.length === 2 && parts[0] && parts[1])
+      ? 'https://www.facebook.com/' + encodeURIComponent(parts[0]) + '/posts/' + encodeURIComponent(parts[1])
+      : 'https://www.facebook.com/photo/?fbid=' + encodeURIComponent(result.id || '');
     return setDonationFields_(id, {
       facebookPostId: postId,
-      facebookPostUrl: result.post_id
-        ? 'https://www.facebook.com/' + encodeURIComponent(result.post_id)
-        : 'https://www.facebook.com/photo/?fbid=' + encodeURIComponent(result.id || ''),
+      facebookPostUrl: postUrl,
       facebookPublishedAt: new Date().toISOString(), publishingStatus: 'published'
     });
   } catch (error) {
@@ -387,16 +389,20 @@ function publishFacebook_(payload) {
 // Isolated Facebook service. Page Photos accepts an image source and message.
 function publishPhotoToFacebook_(donation, suppliedAccessToken) {
   const properties = PropertiesService.getScriptProperties();
-  const accessToken = String(suppliedAccessToken || '').trim() || properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN');
-  const version = properties.getProperty('FACEBOOK_GRAPH_API_VERSION') || DEFAULT_GRAPH_API_VERSION;
+  var accessToken = String(suppliedAccessToken || '').trim() || String(properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN') || '').trim();
+  var version = String(properties.getProperty('FACEBOOK_GRAPH_API_VERSION') || DEFAULT_GRAPH_API_VERSION).trim();
+  if (!version.startsWith('v')) version = 'v' + version;
   if (!accessToken) throw new Error('Facebook Page Access Token is not configured.');
   const identityResponse = UrlFetchApp.fetch(
-    'https://graph.facebook.com/' + encodeURIComponent(version) + '/me?fields=id',
+    'https://graph.facebook.com/' + encodeURIComponent(version) + '/me?fields=id,name,category',
     { headers: { Authorization: 'Bearer ' + accessToken }, muteHttpExceptions: true }
   );
   const identity = parseFacebookResponse_(identityResponse);
   if (identityResponse.getResponseCode() >= 300 || identity.error || !identity.id) {
     throw new Error(facebookErrorMessage_(identity, 'Could not identify the Facebook Page from the access token.'));
+  }
+  if (!identity.category) {
+    throw new Error('The provided token belongs to a User account, not a Facebook Page. Please use a Page Access Token.');
   }
   const pageId = String(identity.id);
   const response = UrlFetchApp.fetch(
@@ -601,7 +607,11 @@ function postMessageResponse_(payload, result) {
     .replace(/</g, '\\u003c');
   const targetOrigin = JSON.stringify(String(payload.origin)).replace(/</g, '\\u003c');
   return HtmlService.createHtmlOutput(
-    '<script>window.top.postMessage(' + message + ', ' + targetOrigin + ');</script>'
+    '<script>' +
+    'var msg=' + message + ',origin=' + targetOrigin + ';' +
+    'try{window.parent.postMessage(msg,origin)}catch(e){}' +
+    'try{if(window.top!==window.parent)window.top.postMessage(msg,origin)}catch(e){}' +
+    '</script>'
   ).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
