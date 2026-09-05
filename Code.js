@@ -369,7 +369,7 @@ function publishFacebook_(payload) {
     return donation;
   }).donation;
   try {
-    const result = publishPhotoToFacebook_(claimed, payload.facebookPageAccessToken);
+    const result = publishPhotoToFacebook_(claimed);
     const postId = String(result.post_id || result.id || '');
     const parts = String(result.post_id || '').split('_');
     const postUrl = (parts.length === 2 && parts[0] && parts[1])
@@ -387,9 +387,9 @@ function publishFacebook_(payload) {
 }
 
 // Isolated Facebook service. Page Photos accepts an image source and message.
-function publishPhotoToFacebook_(donation, suppliedAccessToken) {
+function publishPhotoToFacebook_(donation) {
   const properties = PropertiesService.getScriptProperties();
-  var accessToken = String(suppliedAccessToken || '').trim() || String(properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN') || '').trim();
+  const accessToken = String(properties.getProperty('FACEBOOK_PAGE_ACCESS_TOKEN') || '').trim();
   var version = String(properties.getProperty('FACEBOOK_GRAPH_API_VERSION') || DEFAULT_GRAPH_API_VERSION).trim();
   if (!version.startsWith('v')) version = 'v' + version;
   if (!accessToken) throw new Error('Facebook Page Access Token is not configured.');

@@ -52,11 +52,7 @@
           <label for="adminAccessKey">รหัสผู้ดูแลระบบ
             <input type="password" id="adminAccessKey" autocomplete="current-password" placeholder="ADMIN_ACCESS_KEY">
           </label>
-          <label class="settings-token-field" for="facebookPageAccessToken">Facebook Page Access Token
-            <input type="password" id="facebookPageAccessToken" autocomplete="off" spellcheck="false" placeholder="วาง Page Access Token สำหรับเซสชันนี้">
-          </label>
         </div>
-        <p class="settings-note">Page Access Token เก็บเฉพาะใน sessionStorage ของแท็บนี้และส่งเฉพาะตอนเผยแพร่ หากเว้นว่าง ระบบจะใช้ FACEBOOK_PAGE_ACCESS_TOKEN จาก Script Properties</p>
       </div>
     </details>
 
@@ -481,8 +477,8 @@
     elements.appsScriptUrl.addEventListener('change', () => localStorage.setItem('appsScriptUrl', elements.appsScriptUrl.value.trim()));
     elements.adminAccessKey.value = sessionStorage.getItem('adminAccessKey') || '';
     elements.adminAccessKey.addEventListener('change', () => sessionStorage.setItem('adminAccessKey', elements.adminAccessKey.value));
-    elements.facebookPageAccessToken.value = sessionStorage.getItem('facebookPageAccessToken') || '';
-    elements.facebookPageAccessToken.addEventListener('change', () => sessionStorage.setItem('facebookPageAccessToken', elements.facebookPageAccessToken.value.trim()));
+    // Remove credentials saved by the former frontend token field.
+    sessionStorage.removeItem('facebookPageAccessToken');
     Promise.all([
       fetch('prompt_template.txt', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.text(); }),
       fetch('prompt_styles.json', { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error(); return response.json(); })
@@ -794,7 +790,7 @@
     elements.publishBtn.addEventListener('click', async () => {
       if (!currentDonation || !window.confirm(`ยืนยันเผยแพร่โปสเตอร์ของ “${currentDonation.donorName}” ไปยังเพจ Facebook หรือไม่?\n\nการดำเนินการนี้จะสร้างโพสต์จริง`)) return;
       setBusy(elements.publishBtn, true, 'กำลังเผยแพร่ไปยัง Facebook...');
-      try { const result = await apiPost('publishFacebook', { id: currentDonation.id, facebookPageAccessToken: elements.facebookPageAccessToken.value.trim() }); currentDonation = result.donation; renderDetail(); showToast(result.duplicate ? 'รายการนี้เผยแพร่ไปแล้ว' : 'เผยแพร่ Facebook สำเร็จ'); }
+      try { const result = await apiPost('publishFacebook', { id: currentDonation.id }); currentDonation = result.donation; renderDetail(); showToast(result.duplicate ? 'รายการนี้เผยแพร่ไปแล้ว' : 'เผยแพร่ Facebook สำเร็จ'); }
       catch (error) { showToast(error.message, true); try { currentDonation = (await apiPost('getDonation', { id: currentDonation.id })).donation; renderDetail(); } catch (_) {} }
       finally { setBusy(elements.publishBtn, false, ''); }
     });
